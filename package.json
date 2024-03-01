@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@huddle01/react": "^2.0.5",
+    "@huddle01/server-sdk": "^2.0.6"
+  }
+}
