@@ -12,7 +12,7 @@ export default async function handler(
   }
 
   const accessToken = new AccessToken({
-    apiKey: process.env.API_KEY!,
+    apiKey: process.env.HUDDLE_API_KEY!,
     roomId: roomId as string,
     role: Role.HOST,
     permissions: {
