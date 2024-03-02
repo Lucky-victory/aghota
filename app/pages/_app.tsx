@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { HuddleClient, HuddleProvider } from "@huddle01/react";
+import AppChakraProvider from "../providers/chakra";
 
 const huddleClient = new HuddleClient({
   projectId: process.env.NEXT_PUBLIC_HUDDLE_PROJECT_ID!,
@@ -14,7 +15,9 @@ const huddleClient = new HuddleClient({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <HuddleProvider client={huddleClient}>
-      <Component {...pageProps} />;
+      <AppChakraProvider>
+        <Component {...pageProps} />;
+      </AppChakraProvider>
     </HuddleProvider>
   );
 }
