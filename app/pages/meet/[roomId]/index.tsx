@@ -11,7 +11,7 @@ import {
   Tab,
   TabList,
   TabPanel,
-  TabPanels,
+  TabPanels,Input,
   Tabs,
   Text,
 } from "@chakra-ui/react";
@@ -262,7 +262,8 @@ export const ChatArea = () => {
       <Stack bg={"gray.200"} gap={3} flex={1} px={3} py={2}>
         {/* chat by you */}
         <Stack
-          bg={"white"}
+          bg={"blue.50"}
+          shadow={"sm"}
           alignSelf={"flex-end"}
           p={3}
           maxW={"280px"}
@@ -283,6 +284,7 @@ export const ChatArea = () => {
         {/* chat from others*/}
         <Stack
           bg={"white"}
+          // shadow={"sm"}
           alignSelf={"flex-start"}
           p={3}
           maxW={"280px"}
@@ -301,6 +303,13 @@ export const ChatArea = () => {
           </Text>
         </Stack>
       </Stack>
+      {/* message input area */}
+      <Box>
+<Input name='message' />
+<IconButton>
+
+</IconButton>
+      </Box>
     </Stack>
   );
 };
