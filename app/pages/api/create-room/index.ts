@@ -3,10 +3,13 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
+    const body = req.body;
     const { data } = await axios.post(
       "https://api.huddle01.com/api/v1/create-room",
       {
-        title: "Huddle01 Meet",
+        ...body,
+        hostWallets: [],
+        roomLocked: true,
       },
       {
         headers: {
@@ -16,7 +19,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     );
 
-    res.status(200).json(data);
+    res.status(200).json({ ...data.data });
   } catch (error) {
     res.status(500).json(error);
   }
