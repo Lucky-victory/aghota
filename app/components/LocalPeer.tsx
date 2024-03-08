@@ -5,9 +5,11 @@ import {
   Flex,
   HStack,
   IconButton,
+  ResponsiveValue,
   Spinner,
   Stack,
   Text,
+  Tooltip,
 } from "@chakra-ui/react";
 import {
   useLocalAudio,
@@ -21,7 +23,7 @@ import {
 import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-import { BsRecordCircle } from "react-icons/bs";
+import { BsRecordCircle, BsStop, BsStopCircle } from "react-icons/bs";
 import {
   FiMic,
   FiMicOff,
@@ -29,6 +31,9 @@ import {
   FiUser,
   FiVideo,
   FiVideoOff,
+  FiVolume,
+  FiVolume2,
+  FiVolumeX,
 } from "react-icons/fi";
 import { LuScreenShare, LuScreenShareOff } from "react-icons/lu";
 
@@ -38,8 +43,6 @@ export default function LocalPeer() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const miniVideoRef = useRef<HTMLVideoElement>(null);
   const screenShareRef = useRef<HTMLVideoElement>(null);
-  // const activePeers = useActivePeers();
-  // console.log({ actPeers: activePeers.activePeerIds });
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isMutedAll, setIsMutedAll] = useState<boolean>(false);
 
@@ -63,7 +66,8 @@ export default function LocalPeer() {
       onPeerLeft(peerId) {},
     }
   );
-  console.log({ peers: room.remotePeers });
+  const isIdle = state === "idle";
+
   const {
     enableVideo,
     isVideoOn,
@@ -147,7 +151,16 @@ export default function LocalPeer() {
         break;
       case "muteAll":
         try {
-          isRecording ? await stopScreenShare() : await startScreenShare();
+          if (isMutedAll) {
+            await room.updateRoomControls({
+              type: "allowProduce",
+              value: true,
+            });
+            setIsMutedAll(false);
+          } else {
+            await muteEveryone();
+            setIsMutedAll(true);
+          }
         } catch (error) {}
         break;
 
@@ -160,6 +173,20 @@ export default function LocalPeer() {
     leaveRoom();
     router.push("/");
   }
+
+  const controlsBtnStyle = {
+    bg: "rgba(0,0,0,0.25)",
+    _hover: {
+      bg: "rgba(0,0,0,0.71)",
+    },
+    backdropFilter: "blur(5px)",
+    rounded: "full",
+    color: "white",
+    fontSize: "20px",
+    p: 3,
+    h: "auto",
+    isDisabled: isIdle,
+  };
   return (
     <Flex
       flex={1}
@@ -172,8 +199,34 @@ export default function LocalPeer() {
     >
       {state === "connected" && (
         <>
+          {shareScreenStream && videoStream && (
+            <Box
+              w={"250px"}
+              zIndex={3}
+              h={"150px"}
+              rounded={"lg"}
+              pos={"absolute"}
+              overflow={"hidden"}
+              top={2}
+              left={2}
+            >
+              <Box
+                as="video"
+                muted
+                autoPlay
+                ref={miniVideoRef}
+                h={"full"}
+                w={"full"}
+                left={0}
+                top={0}
+                // aspectRatio={"16:9"}
+                objectFit={"cover"}
+                pos={"absolute"}
+              ></Box>
+            </Box>
+          )}
           {!(isVideoOn && shareScreenStream) && (
-            <Stack align={"center"} justify={"center"} h={"full"}>
+            <Stack flex={1} align={"center"} justify={"center"} h={"full"}>
               <Avatar
                 name={displayName}
                 size={"xl"}
@@ -215,6 +268,18 @@ export default function LocalPeer() {
           )}
         </>
       )}
+      {isIdle && (
+        <Flex gap={5} w={"full"} h={"full"} justify={"center"} align={"center"}>
+          <Spinner
+            thickness="4px"
+            speed="0.75s"
+            emptyColor="gray.200"
+            color="gray.600"
+            size="xl"
+          />
+          <Text fontSize={"20px"}>Waiting...</Text>
+        </Flex>
+      )}
       {state == "connecting" && (
         <Flex gap={5} w={"full"} h={"full"} justify={"center"} align={"center"}>
           <Spinner
@@ -237,16 +302,8 @@ export default function LocalPeer() {
         gap={3}
       >
         <IconButton
-          aria-label="enable or disable mic"
-          bg={"rgba(0,0,0,0.5)"}
-          _hover={{
-            bg: "rgba(0,0,0,1)",
-          }}
-          rounded={"full"}
-          color={"white"}
-          fontSize={"20px"}
-          p={3}
-          h={"auto"}
+          aria-label={`${isAudioOn ? "disable" : "enable"} mic`}
+          {...controlsBtnStyle}
           onClick={() => handleEvents("audio")}
         >
           {isAudioOn ? <FiMic /> : <FiMicOff />}
@@ -254,32 +311,16 @@ export default function LocalPeer() {
           {/* <FiMicOff /> */}
         </IconButton>
         <IconButton
-          bg={"rgba(0,0,0,0.5)"}
-          _hover={{
-            bg: "rgba(0,0,0,1)",
-          }}
-          rounded={"full"}
-          color={"white"}
-          fontSize={"20px"}
-          p={3}
-          h={"auto"}
-          aria-label="enable or disable video"
+          {...controlsBtnStyle}
+          aria-label={`${isVideoOn ? "disable" : "enable"} video`}
           onClick={() => handleEvents("video")}
         >
           {isVideoOn ? <FiVideo /> : <FiVideoOff />}
           {/* <FiVideoOff /> */}
         </IconButton>
         <IconButton
-          bg={"rgba(0,0,0,0.5)"}
-          _hover={{
-            bg: "rgba(0,0,0,1)",
-          }}
-          rounded={"full"}
-          p={3}
-          h={"auto"}
-          color={"white"}
-          fontSize={"20px"}
-          aria-label="start or stop screen share"
+          {...controlsBtnStyle}
+          aria-label={`${shareScreenStream ? "stop" : "start"} screen share`}
           onClick={() => handleEvents("screen")}
         >
           {shareScreenStream ? <LuScreenShare /> : <LuScreenShareOff />}
@@ -287,19 +328,13 @@ export default function LocalPeer() {
           {/* <LuScreenShareOff /> */}
         </IconButton>
         <IconButton
-          bg={"rgba(0,0,0,0.5)"}
-          _hover={{
-            bg: "rgba(0,0,0,1)",
-          }}
-          rounded={"full"}
-          color={"white"}
-          fontSize={"20px"}
-          p={3}
-          h={"auto"}
-          aria-label="start or stop recording"
+          onClick={() => handleEvents("record")}
+          {...controlsBtnStyle}
+          aria-label={`${isRecording ? "stop" : "start"} recording`}
         >
-          <BsRecordCircle />
+          {isRecording ? <BsStopCircle color="red" /> : <BsRecordCircle />}
         </IconButton>
+
         <IconButton
           w={"80px"}
           aria-label="Leave meeting"

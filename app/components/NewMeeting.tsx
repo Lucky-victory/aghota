@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Heading, Input } from "@chakra-ui/react";
 import axios from "axios";
 import { useRouter, NextRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function NewMeeting({ router }: { router: NextRouter }) {
   const [meetingTitle, setMeetingTitle] = useState("");
@@ -9,6 +9,7 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
 
   async function handleCreateNewMeeting() {
     console.log("handleCreateNewMeeting");
+    let roomId = "";
     try {
       setIsSending(true);
 
@@ -19,10 +20,29 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
         }
       );
       const { data } = response;
-
-      router.push(`/meet/${data?.roomId}`);
+      roomId = data?.roomId;
       setIsSending(false);
-    } catch (error) {}
+    } catch (error) {
+      console.log("Error creating room", { error });
+    }
+
+    console.log("create admin token");
+    try {
+      const response = await axios.post(
+        `/api/create-admin-token?roomId=${roomId}`
+      );
+      const data = response.data;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("roomToken", data.token);
+      }
+      router.push(`/meet/${roomId}`);
+
+      //  await handleJoinRoom(data?.token);
+    } catch (error) {
+      console.log("Error creating admin token", { error });
+    }
+
+    // handleCreateNewToken();
   }
   return (
     <Flex flexDir={"column"} gap={4} maxW={400}>

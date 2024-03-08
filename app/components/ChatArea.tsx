@@ -58,28 +58,21 @@ export const ChatArea = () => {
     if (messages.length) {
       scrollToBottomRef.current?.scrollIntoView({
         behavior: "smooth",
-      
       });
     }
   }, [messages.length]);
 
   return (
-    <Stack h={"full"}>
-      <HStack justify={"center"} roundedTop={"20px"} p={2} bg={"gray.700"}>
-        <Heading flex={1} size={"sm"} color={"white"} textAlign={"center"}>
+    <Stack h={"full"} p={2} pb={1}>
+      <HStack justify={"center"} roundedTop={"20px"} px={4} py={2} bg={"white"}>
+        <Heading flex={1} size={"sm"}>
           Room Chat
         </Heading>
-        <IconButton
-          color={"white"}
-          _hover={{ bg: "gray.600" }}
-          variant={"ghost"}
-          rounded={"full"}
-          aria-label="close chat"
-        >
+        <IconButton variant={"ghost"} rounded={"full"} aria-label="close chat">
           <CgClose />
         </IconButton>
       </HStack>
-      <Stack gap={3} flex={1} px={3} py={2} maxH={500} overflowY={"auto"}>
+      <Stack gap={3} flex={1} px={1} py={2} maxH={500} overflowY={"auto"}>
         {messages.map((message, i) => {
           return isLocalPeer(message.sender) ? (
             <Stack
@@ -94,7 +87,7 @@ export const ChatArea = () => {
             >
               <HStack
                 align={"flex-start"}
-                fontSize={"14px"}
+                fontSize={"13px"}
                 justify={"space-between"}
               >
                 <Text as={"span"} fontWeight={500}>
@@ -104,7 +97,7 @@ export const ChatArea = () => {
                   {format(message.timestamp, "hh:mm aaa")}
                 </Text>
               </HStack>
-              <Text fontSize={"14px"}>{message.text}</Text>
+              <Text fontSize={"15px"}>{message.text}</Text>
             </Stack>
           ) : (
             <Stack
@@ -135,7 +128,7 @@ export const ChatArea = () => {
         <div ref={scrollToBottomRef} />
       </Stack>
       {/* message input area */}
-      <Box px={2} py={3}>
+      <Box px={1} py={3}>
         <HStack p={2} bg={"white"} rounded={"full"}>
           <Input
             name="message"

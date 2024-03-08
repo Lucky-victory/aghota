@@ -45,12 +45,15 @@ import {
   usePeerIds,
   useRoom,
   useActivePeers,
+  useRemotePeer,
+  useLobby,
 } from "@huddle01/react/hooks";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import NewPeerRequest from "@/components/NewPeerRequest";
 import RemotePeer from "@/components/RemotePeer";
 import LocalPeer from "@/components/LocalPeer";
 import { ChatArea } from "@/components/ChatArea";
+import isEmpty from "just-is-empty";
 
 export type TPeerMetadata = {
   displayName: string;
@@ -66,11 +69,17 @@ export default function MeetPage() {
     pos: "relative" as ResponsiveValue<"relative">,
     maxW: 300,
   };
+  let roomToken = "";
+  if (typeof window !== "undefined") {
+    roomToken = window.localStorage.getItem("roomToken") as string;
+  }
+  const lobbyPeers = useLobby();
+  console.log({ lobbyPeers });
+
   const activePeers = useActivePeers();
   const router = useRouter();
   const [displayName, setDisplayName] = useState<string>("Lucky");
   const videoRef = useRef<HTMLVideoElement>(null);
-  const miniVideoRef = useRef<HTMLVideoElement>(null);
   const screenShareRef = useRef<HTMLVideoElement>(null);
 
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -86,13 +95,13 @@ export default function MeetPage() {
       updateLocalPeerMetadata({ displayName });
     },
     onWaiting(data) {
-      console.log({ data }, "on waiting");
+      console.log({ data, wait: room.lobbyPeerIds }, "on waiting");
     },
     onPeerJoin: (peerId) => {
       console.log("onPeerJoin", peerId);
     },
   });
-  console.log({ peers: room.remotePeers });
+  console.log({ peers: room.lobbyPeers });
   const {
     enableVideo,
     isVideoOn,
@@ -109,7 +118,7 @@ export default function MeetPage() {
     useLocalPeer<TPeerMetadata>();
   const { peerIds } = usePeerIds();
   const roomId = router.query.roomId as string;
-
+  // const remotePeer=useRemotePeer()
   useEffect(() => {
     if (!shareScreenStream && videoStream && videoRef.current) {
       videoRef.current.srcObject = videoStream;
@@ -121,32 +130,43 @@ export default function MeetPage() {
       screenShareRef.current.srcObject = shareScreenStream;
     }
   }, [shareScreenStream]);
-  useEffect(() => {
-    if (videoStream && shareScreenStream && miniVideoRef.current) {
-      miniVideoRef.current.srcObject = videoStream;
-    }
-  }, [shareScreenStream, videoStream]);
 
-  async function handleJoinRoom(token: string) {
+  async function handleJoinRoom(token?: string) {
     await joinRoom({
       roomId: roomId as string,
-      token,
+      token: token as string,
     });
   }
   useEffect(() => {
-    // async function handleCreateNewToken() {
-    //   console.log("handleCreateNewMeeting");
-    //   try {
-    //     const response = await axios.get(
-    //       `/api/create-access-token?roomId=${roomId}`
-    //     );
-    //     const data = response.data;
-    //     setToken(data?.token);
-    //     await handleJoinRoom(data?.token);
-    //   } catch (error) {}
-    // }
-    // handleCreateNewToken();
+    const fetcher = async () => {
+      if (!isEmpty(roomToken) && roomId) {
+        await joinRoom({
+          roomId: roomId as string,
+          token: roomToken,
+        });
+      }
+    };
+    fetcher();
   }, [roomId]);
+
+  async function handleCreateNewToken() {
+    console.log("handleCreateNewMeeting");
+    try {
+      const response = await axios.post(
+        `/api/create-user-token?roomId=${roomId}`,
+        {
+          displayName: "Mark Emy",
+        }
+      );
+      const data = response.data;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("roomToken", data.token);
+      }
+      await handleJoinRoom(data?.token);
+      setDisplayName(data?.metadata?.displayName);
+    } catch (error) {}
+  }
+
   async function handleEvents(type: "audio" | "video" | "screen") {
     switch (type) {
       case "audio":
@@ -173,8 +193,13 @@ export default function MeetPage() {
     }
   }
   return (
-    <Flex as="main" minH={"var(--chakra-vh)"} bg={"gray.500"} p={3}>
-      <Flex direction={"column"} gap={3} flex={1} minH={"full"}>
+    <Flex as="main" minH={"var(--chakra-vh)"} bg={"gray.100"} p={2}>
+      {!roomToken && (
+        <Box>
+          <Button onClick={() => handleCreateNewToken()}>Join room</Button>
+        </Box>
+      )}
+      <Flex direction={"column"} gap={2} flex={1} minH={"full"}>
         <HStack
           justify={"space-between"}
           gap={5}
@@ -201,14 +226,14 @@ export default function MeetPage() {
                 right={2}
                 pos={"absolute"}
               ></Badge>
-              {JSON.stringify(room.config)}
+
               <FiUsers />
             </Button>
             <NewPeerRequest room={room} peerId={""} />
           </HStack>
         </HStack>
 
-        <Flex h={"full"} rounded={"30px"} p={3} gap={4}>
+        <Flex h={"full"} bg={"white"} rounded={"30px"} p={2} gap={3}>
           {/* video area */}
           <Flex flexDir={"column"} gap={3} flex={1} minH={"full"}>
             <LocalPeer />
@@ -218,23 +243,7 @@ export default function MeetPage() {
                 peerIds.map((peerId) => (
                   <RemotePeer key={peerId} peerId={peerId} />
                 ))}
-              {shareScreenStream && videoStream && (
-                <Box {...participantsCardStyle}>
-                  <Box
-                    as="video"
-                    muted
-                    autoPlay
-                    ref={miniVideoRef}
-                    h={"full"}
-                    w={"full"}
-                    left={0}
-                    top={0}
-                    // aspectRatio={"16:9"}
-                    objectFit={"cover"}
-                    pos={"absolute"}
-                  ></Box>
-                </Box>
-              )}
+
               <Box {...participantsCardStyle}>
                 <IconButton
                   pos={"absolute"}

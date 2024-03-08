@@ -6,7 +6,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { roomId } = req.query;
-
+  const { metadata = {} } = req.body;
   if (!roomId) {
     return res.status(400).json({ error: "roomId is required" });
   }
@@ -14,9 +14,10 @@ export default async function handler(
   const accessToken = new AccessToken({
     apiKey: process.env.HUDDLE_API_KEY!,
     roomId: roomId as string,
-    role: Role.HOST,
+    role: Role.LISTENER,
+    options: { metadata: metadata },
     permissions: {
-      admin: true,
+      admin: false,
       canConsume: true,
       canProduce: true,
       canProduceSources: {
@@ -26,11 +27,11 @@ export default async function handler(
       },
       canRecvData: true,
       canSendData: true,
-      canUpdateMetadata: true,
+      canUpdateMetadata: false,
     },
   });
 
   const token = await accessToken.toJwt();
 
-  return res.status(200).json({ token });
+  return res.status(200).json({ token, roomId, metadata });
 }
