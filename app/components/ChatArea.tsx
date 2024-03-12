@@ -21,8 +21,10 @@ export type TMessage = {
 export const ChatArea = () => {
   const [messages, setMessages] = useState<TMessage[]>([]);
   const [text, setText] = useState<string>("");
+  const [isMinimized, setIsMinimized] = useState<boolean>(true);
+  const { peerId, role, metadata } = useLocalPeer();
+  console.log({ peerId, role, metadata });
 
-  const { peerId } = useLocalPeer();
   const scrollToBottomRef = useRef<HTMLDivElement>(null);
   const { sendData } = useDataMessage({
     onMessage: (payload, from, label) => {
@@ -80,7 +82,7 @@ export const ChatArea = () => {
               bg={"blue.50"}
               shadow={"sm"}
               alignSelf={"flex-end"}
-              p={3}
+              p={2}
               maxW={"280px"}
               roundedBottomRight={"25px"}
               roundedLeft={"25px"}
@@ -104,7 +106,7 @@ export const ChatArea = () => {
               bg={"white"}
               // shadow={"sm"}
               alignSelf={"flex-start"}
-              p={3}
+              p={2}
               maxW={"280px"}
               roundedBottomLeft={"25px"}
               roundedRight={"25px"}

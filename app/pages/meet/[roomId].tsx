@@ -54,11 +54,18 @@ import RemotePeer from "@/components/RemotePeer";
 import LocalPeer from "@/components/LocalPeer";
 import { ChatArea } from "@/components/ChatArea";
 import isEmpty from "just-is-empty";
+import { useAppDispatch } from "../../state/store";
+import {
+  updateLobbyPeer,
+  updateRemotePeer,
+  updateRemotePeerIds,
+} from "@/state/slices";
 
 export type TPeerMetadata = {
   displayName: string;
 };
 export default function MeetPage() {
+  const dispatch = useAppDispatch();
   const participantsCardStyle = {
     overflow: "hidden",
     minW: 200,
@@ -81,27 +88,39 @@ export default function MeetPage() {
   const [displayName, setDisplayName] = useState<string>("Lucky");
   const videoRef = useRef<HTMLVideoElement>(null);
   const screenShareRef = useRef<HTMLVideoElement>(null);
-
+  const [lobbyPeersIds, setLobbyPeersIds] = useState<string[]>([]);
   const [isRecording, setIsRecording] = useState<boolean>(false);
 
-  const { joinRoom, state, room, muteEveryone, leaveRoom } = useRoom({
+  const roomInstance = useRoom({
     onFailed(data) {
       console.log("Failed to join room", data);
     },
     onJoin: (data) => {
       // data.room
       console.log("onRoomJoin", data);
-      console.log({ roomLocked: room.config });
+      console.log({ roomLocked: room.config, room: room });
       updateLocalPeerMetadata({ displayName });
     },
     onWaiting(data) {
+      setLobbyPeersIds(room.lobbyPeerIds);
       console.log({ data, wait: room.lobbyPeerIds }, "on waiting");
     },
     onPeerJoin: (peerId) => {
+      dispatch(
+        updateRemotePeer({
+          peerId,
+          metadata: { displayName: "Mike" },
+        })
+      );
+      dispatch(updateRemotePeerIds(peerId));
       console.log("onPeerJoin", peerId);
     },
   });
-  console.log({ peers: room.lobbyPeers });
+
+  const { joinRoom, state, room, muteEveryone, leaveRoom } = roomInstance;
+  console.log({
+    peers: room.lobbyPeers,
+  });
   const {
     enableVideo,
     isVideoOn,
@@ -114,7 +133,7 @@ export default function MeetPage() {
     stopScreenShare,
     shareStream: shareScreenStream,
   } = useLocalScreenShare();
-  const { updateMetadata: updateLocalPeerMetadata } =
+  const { updateMetadata: updateLocalPeerMetadata, role } =
     useLocalPeer<TPeerMetadata>();
   const { peerIds } = usePeerIds();
   const roomId = router.query.roomId as string;
@@ -131,11 +150,18 @@ export default function MeetPage() {
     }
   }, [shareScreenStream]);
 
+  useEffect(() => {
+    console.log({ lobbys: lobbyPeers });
+  }, [lobbyPeers.lobbyPeersIds?.length]);
   async function handleJoinRoom(token?: string) {
-    await joinRoom({
-      roomId: roomId as string,
-      token: token as string,
-    });
+    try {
+      await joinRoom({
+        roomId: roomId as string,
+        token: token as string,
+      });
+    } catch (error) {
+      console.log("Error while joining room", { error });
+    }
   }
   useEffect(() => {
     const fetcher = async () => {
@@ -147,7 +173,7 @@ export default function MeetPage() {
       }
     };
     fetcher();
-  }, [roomId]);
+  }, [roomId, roomToken]);
 
   async function handleCreateNewToken() {
     console.log("handleCreateNewMeeting");
@@ -162,8 +188,10 @@ export default function MeetPage() {
       if (typeof window !== "undefined") {
         window.localStorage.setItem("roomToken", data.token);
       }
-      await handleJoinRoom(data?.token);
+      console.log({ data });
+
       setDisplayName(data?.metadata?.displayName);
+      await handleJoinRoom(data?.token);
     } catch (error) {}
   }
 
@@ -236,7 +264,7 @@ export default function MeetPage() {
         <Flex h={"full"} bg={"white"} rounded={"30px"} p={2} gap={3}>
           {/* video area */}
           <Flex flexDir={"column"} gap={3} flex={1} minH={"full"}>
-            <LocalPeer />
+            <LocalPeer {...roomInstance} local={{ role: role }} />
             {/* participants area */}
             <HStack h={"150px"} rounded={"30px"} gap={3}>
               {peerIds?.length > 0 &&

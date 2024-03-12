@@ -2,6 +2,8 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { HuddleClient, HuddleProvider } from "@huddle01/react";
 import AppChakraProvider from "../providers/chakra";
+import { Provider } from "react-redux";
+import store from "@/state/store";
 
 const huddleClient = new HuddleClient({
   projectId: process.env.NEXT_PUBLIC_HUDDLE_PROJECT_ID!,
@@ -14,10 +16,12 @@ const huddleClient = new HuddleClient({
 });
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <HuddleProvider client={huddleClient}>
-      <AppChakraProvider>
-        <Component {...pageProps} />;
-      </AppChakraProvider>
-    </HuddleProvider>
+    <Provider store={store}>
+      <HuddleProvider client={huddleClient}>
+        <AppChakraProvider>
+          <Component {...pageProps} />;
+        </AppChakraProvider>
+      </HuddleProvider>
+    </Provider>
   );
 }

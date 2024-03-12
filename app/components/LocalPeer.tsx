@@ -28,6 +28,7 @@ import {
   FiMic,
   FiMicOff,
   FiPhone,
+  FiStopCircle,
   FiUser,
   FiVideo,
   FiVideoOff,
@@ -36,8 +37,29 @@ import {
   FiVolumeX,
 } from "react-icons/fi";
 import { LuScreenShare, LuScreenShareOff } from "react-icons/lu";
+import { Room } from "@huddle01/web-core";
+import { RoomEvents, RoomStates } from "@huddle01/web-core/types";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
-export default function LocalPeer() {
+export interface Props {
+  local: Record<string, any>;
+  room: Room;
+  state: RoomStates;
+  joinRoom: (data: { roomId: string; token: string }) => Promise<Room>;
+  leaveRoom: () => void;
+  closeRoom: () => void;
+  kickPeer: (peerId: string) => Promise<void>;
+  muteEveryone: () => Promise<void>;
+  closeStreamOfLabel: (data: {
+    label: string;
+    peerIds?: string[] | undefined;
+  }) => Promise<void>;
+}
+export default function LocalPeer(props: Props) {
+  const localState = useSelector((state: RootState) => state.local);
+  console.log({ localState });
+
   const router = useRouter();
   const [displayName, setDisplayName] = useState<string>("Lucky");
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -46,27 +68,7 @@ export default function LocalPeer() {
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isMutedAll, setIsMutedAll] = useState<boolean>(false);
 
-  const { joinRoom, state, room, closeRoom, muteEveryone, leaveRoom } = useRoom(
-    {
-      onFailed(data) {
-        console.log("Failed to join room", data);
-      },
-      onJoin: (data) => {
-        // data.room
-        console.log("onRoomJoin", data);
-        console.log({ roomLocked: room.config });
-        updateLocalPeerMetadata({ displayName });
-      },
-      onWaiting(data) {
-        console.log({ data }, "on waiting");
-      },
-      onPeerJoin: (peerId) => {
-        console.log("onPeerJoin", peerId);
-      },
-      onPeerLeft(peerId) {},
-    }
-  );
-  const isIdle = state === "idle";
+  const isIdle = props.state === "idle";
 
   const {
     enableVideo,
@@ -80,9 +82,7 @@ export default function LocalPeer() {
     stopScreenShare,
     shareStream: shareScreenStream,
   } = useLocalScreenShare();
-  const { updateMetadata: updateLocalPeerMetadata } =
-    useLocalPeer<TPeerMetadata>();
-  const { peerIds } = usePeerIds();
+
   const roomId = router.query.roomId as string;
 
   useEffect(() => {
@@ -103,25 +103,12 @@ export default function LocalPeer() {
   }, [shareScreenStream, videoStream]);
 
   async function handleJoinRoom(token: string) {
-    await joinRoom({
+    await props.joinRoom({
       roomId: roomId as string,
       token,
     });
   }
-  useEffect(() => {
-    async function handleCreateNewToken() {
-      console.log("handleCreateNewMeeting");
-      try {
-        const response = await axios.get(
-          `/api/create-access-token?roomId=${roomId}`
-        );
-        const data = response.data;
 
-        await handleJoinRoom(data?.token);
-      } catch (error) {}
-    }
-    handleCreateNewToken();
-  }, [roomId]);
   async function handleEvents(
     type: "audio" | "video" | "screen" | "record" | "muteAll"
   ) {
@@ -152,13 +139,13 @@ export default function LocalPeer() {
       case "muteAll":
         try {
           if (isMutedAll) {
-            await room.updateRoomControls({
+            await props.room.updateRoomControls({
               type: "allowProduce",
               value: true,
             });
             setIsMutedAll(false);
           } else {
-            await muteEveryone();
+            await props.muteEveryone();
             setIsMutedAll(true);
           }
         } catch (error) {}
@@ -170,7 +157,7 @@ export default function LocalPeer() {
   }
 
   function handleLeaveRoom() {
-    leaveRoom();
+    props.leaveRoom();
     router.push("/");
   }
 
@@ -197,8 +184,33 @@ export default function LocalPeer() {
       bg={"gray.100"}
       // p={4}
     >
-      {state === "connected" && (
+      {props.state === "connected" && (
         <>
+          <HStack justify={"space-between"}>
+            <Box
+              rounded={"full"}
+              px={3}
+              py={1}
+              bg={"whiteAlpha.400"}
+              backdropFilter={"auto"}
+              backdropBlur={"5px"}
+            >
+              <Text as={"span"} fontWeight={500}>
+                You
+              </Text>
+            </Box>
+            <Box
+              rounded={"full"}
+              px={3}
+              py={1}
+              bg={"whiteAlpha.400"}
+              backdropFilter={"auto"}
+              backdropBlur={"5px"}
+            >
+              <FiStopCircle color="red" />
+              <Text as={"span"}>Recording...</Text>
+            </Box>
+          </HStack>
           {shareScreenStream && videoStream && (
             <Box
               w={"250px"}
@@ -280,7 +292,7 @@ export default function LocalPeer() {
           <Text fontSize={"20px"}>Waiting...</Text>
         </Flex>
       )}
-      {state == "connecting" && (
+      {props.state == "connecting" && (
         <Flex gap={5} w={"full"} h={"full"} justify={"center"} align={"center"}>
           <Spinner
             thickness="4px"
@@ -327,13 +339,15 @@ export default function LocalPeer() {
           {/* <LuScreenShare /> */}
           {/* <LuScreenShareOff /> */}
         </IconButton>
-        <IconButton
-          onClick={() => handleEvents("record")}
-          {...controlsBtnStyle}
-          aria-label={`${isRecording ? "stop" : "start"} recording`}
-        >
-          {isRecording ? <BsStopCircle color="red" /> : <BsRecordCircle />}
-        </IconButton>
+        {props.local.role === "host" && (
+          <IconButton
+            onClick={() => handleEvents("record")}
+            {...controlsBtnStyle}
+            aria-label={`${isRecording ? "stop" : "start"} recording`}
+          >
+            {isRecording ? <BsStopCircle color="red" /> : <BsRecordCircle />}
+          </IconButton>
+        )}
 
         <IconButton
           w={"80px"}

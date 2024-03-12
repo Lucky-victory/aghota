@@ -1,3 +1,4 @@
+import { RootState } from "@/state/store";
 import { Box, Flex, IconButton, ResponsiveValue } from "@chakra-ui/react";
 import {
   useRemoteAudio,
@@ -6,6 +7,7 @@ import {
 } from "@huddle01/react/hooks";
 import React, { useEffect, useRef } from "react";
 import { FiMicOff } from "react-icons/fi";
+import { useSelector } from "react-redux";
 
 type Props = {
   peerId: string;
@@ -14,6 +16,9 @@ type Props = {
 const RemotePeer = ({ peerId }: Props) => {
   const { stream, state } = useRemoteVideo({ peerId });
   const { stream: audioStream, state: audioState } = useRemoteAudio({ peerId });
+  const remoteState = useSelector((state: RootState) => state.remote);
+  console.log({ remoteState });
+
   const { videoStream: screenVideo, audioStream: screenAudio } =
     useRemoteScreenShare({ peerId });
   const vidRef = useRef<HTMLVideoElement>(null);
