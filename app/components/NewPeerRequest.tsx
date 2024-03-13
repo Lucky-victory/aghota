@@ -10,45 +10,52 @@ export default function NewPeerRequest({
   room: Room;
   peerId: string;
 }) {
-  function acceptPeer() {
+  function acceptPeer(peerId: string) {
     room.admitPeer(peerId);
   }
-  function denyPeer() {
+  function denyPeer(peerId: string) {
     room.denyPeer(peerId);
   }
   return (
     <Box>
-      <HStack gap={4} bg={"gray.100"} px={"10px"} py={"6px"} rounded={"full"}>
-        <Text as={"span"}>
-          <Text as={"span"} fontWeight={500}>
-            Mary
-          </Text>{" "}
-          {/* wants to join the meeting */}
-          {room.lobbyPeerIds.map((peerId) => {
-            return <Text key={peerId}>{peerId} wants to join</Text>;
-          })}
-        </Text>
-        <HStack>
-          <IconButton
-            rounded={"full"}
-            size={"sm"}
-            aria-label="reject"
-            colorScheme="red"
-            onClick={() => denyPeer()}
-          >
-            <FiSlash size={20} />
-          </IconButton>
-          <IconButton
-            onClick={() => acceptPeer()}
-            size={"sm"}
-            colorScheme="green"
-            rounded={"full"}
-            aria-label="accept"
-          >
-            <FiCheck size={22} />
-          </IconButton>
+      {room.lobbyPeerIds.map((peerId) => (
+        <HStack
+          key={peerId}
+          gap={4}
+          bg={"gray.100"}
+          px={"10px"}
+          py={"6px"}
+          rounded={"full"}
+        >
+          <Text as={"span"}>
+            <Text as={"span"} fontWeight={500}>
+              {peerId}
+            </Text>{" "}
+            {/* wants to join the meeting */}
+            <Text>wants to join</Text>;
+          </Text>
+          <HStack>
+            <IconButton
+              rounded={"full"}
+              size={"sm"}
+              aria-label="reject"
+              colorScheme="red"
+              onClick={() => denyPeer(peerId)}
+            >
+              <FiSlash size={20} />
+            </IconButton>
+            <IconButton
+              onClick={() => acceptPeer(peerId)}
+              size={"sm"}
+              colorScheme="green"
+              rounded={"full"}
+              aria-label="accept"
+            >
+              <FiCheck size={22} />
+            </IconButton>
+          </HStack>
         </HStack>
-      </HStack>
+      ))}
     </Box>
   );
 }

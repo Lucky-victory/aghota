@@ -10,7 +10,6 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
   const [isSending, setIsSending] = useState(false);
 
   async function handleCreateNewMeeting() {
-    console.log("handleCreateNewMeeting");
     let roomId = "";
     try {
       setIsSending(true);
@@ -25,14 +24,14 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
       const { data } = response;
       roomId = data?.roomId;
       const token = data?.token;
-      console.log("create admin token");
+
       try {
         // const response = await axios.post(
         //   `/api/create-admin-token?roomId=${roomId}`
         // );
         // const data = response.data;
-      
-        router.push(`/meet/${roomId}`);
+
+        router.push(`/meet/${roomId}?rc=1`);
 
         //  await handleJoinRoom(data?.token);
       } catch (error) {

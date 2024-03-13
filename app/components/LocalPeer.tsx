@@ -4,25 +4,18 @@ import {
   Flex,
   HStack,
   IconButton,
-  ResponsiveValue,
   Spinner,
   Stack,
   Text,
-  Tooltip,
 } from "@chakra-ui/react";
 import {
   useLocalAudio,
-  useLocalPeer,
   useLocalScreenShare,
   useLocalVideo,
-  usePeerIds,
-  useRoom,
-  useRoomControls,
 } from "@huddle01/react/hooks";
-import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-import { BsRecordCircle, BsStop, BsStopCircle } from "react-icons/bs";
+import { BsRecordCircle, BsStopCircle } from "react-icons/bs";
 import {
   FiMic,
   FiMicOff,
@@ -31,18 +24,22 @@ import {
   FiUser,
   FiVideo,
   FiVideoOff,
-  FiVolume,
-  FiVolume2,
-  FiVolumeX,
 } from "react-icons/fi";
 import { LuScreenShare, LuScreenShareOff } from "react-icons/lu";
 import { Room } from "@huddle01/web-core";
-import { RoomEvents, RoomStates } from "@huddle01/web-core/types";
+import { RoomStates } from "@huddle01/web-core/types";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 
 export interface Props {
-  local: Record<string, any>;
+  local: Record<string, any> & {
+    activePeers: {
+      activePeerIds: string[];
+      dominantSpeakerId: string;
+      updateSize: (size: number) => void;
+    };
+    localPeerId: string;
+  };
   room: Room;
   state: RoomStates;
   joinRoom: (data: { roomId: string; token: string }) => Promise<Room>;
@@ -57,8 +54,8 @@ export interface Props {
 }
 export default function LocalPeer(props: Props) {
   const localState = useSelector((state: RootState) => state.local);
-  console.log({ localState });
 
+  const isHost = props.local.role === "host";
   const router = useRouter();
   const [displayName, setDisplayName] = useState<string>("Lucky");
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -66,7 +63,9 @@ export default function LocalPeer(props: Props) {
   const screenShareRef = useRef<HTMLVideoElement>(null);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isMutedAll, setIsMutedAll] = useState<boolean>(false);
-
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const { activePeers, localPeerId } = props.local;
+  const { activePeerIds, dominantSpeakerId } = activePeers;
   const isIdle = props.state === "idle";
 
   const {
@@ -75,7 +74,12 @@ export default function LocalPeer(props: Props) {
     stream: videoStream,
     disableVideo,
   } = useLocalVideo();
-  const { enableAudio, disableAudio, isAudioOn } = useLocalAudio();
+  const {
+    enableAudio,
+    disableAudio,
+    isAudioOn,
+    stream: audioStream,
+  } = useLocalAudio();
   const {
     startScreenShare,
     stopScreenShare,
@@ -101,12 +105,13 @@ export default function LocalPeer(props: Props) {
     }
   }, [shareScreenStream, videoStream]);
 
-  async function handleJoinRoom(token: string) {
-    await props.joinRoom({
-      roomId: roomId as string,
-      token,
-    });
-  }
+  useEffect(() => {
+    if (dominantSpeakerId == localPeerId && audioStream) {
+      setIsSpeaking(true);
+    } else {
+      setIsSpeaking(false);
+    }
+  }, [dominantSpeakerId, localPeerId, audioStream]);
 
   async function handleControls(
     type: "audio" | "video" | "screen" | "record" | "muteAll"
@@ -165,7 +170,7 @@ export default function LocalPeer(props: Props) {
     _hover: {
       bg: "rgba(0,0,0,0.71)",
     },
-    backdropFilter: "blur(5px)",
+    backdropFilter: "blur(10px)",
     rounded: "full",
     color: "white",
     fontSize: "20px",
@@ -173,112 +178,9 @@ export default function LocalPeer(props: Props) {
     h: "auto",
     isDisabled: isIdle,
   };
+
   return (
-    <Flex
-      flex={1}
-      // overflow={"hidden"}
-      pos={"relative"}
-      rounded={"30px"}
-      w={"full"}
-      bg={"gray.100"}
-      // p={4}
-    >
-      {props.state === "connected" && (
-        <>
-          <HStack justify={"space-between"}>
-            <Box
-              rounded={"full"}
-              px={3}
-              py={1}
-              bg={"whiteAlpha.400"}
-              backdropFilter={"auto"}
-              backdropBlur={"5px"}
-            >
-              <Text as={"span"} fontWeight={500}>
-                You
-              </Text>
-            </Box>
-            <Box
-              rounded={"full"}
-              px={3}
-              py={1}
-              bg={"whiteAlpha.400"}
-              backdropFilter={"auto"}
-              backdropBlur={"5px"}
-            >
-              <FiStopCircle color="red" />
-              <Text as={"span"}>Recording...</Text>
-            </Box>
-          </HStack>
-          {shareScreenStream && videoStream && (
-            <Box
-              w={"250px"}
-              zIndex={3}
-              h={"150px"}
-              rounded={"lg"}
-              pos={"absolute"}
-              overflow={"hidden"}
-              top={2}
-              left={2}
-            >
-              <Box
-                as="video"
-                muted
-                autoPlay
-                ref={miniVideoRef}
-                h={"full"}
-                w={"full"}
-                left={0}
-                top={0}
-                // aspectRatio={"16:9"}
-                objectFit={"cover"}
-                pos={"absolute"}
-              ></Box>
-            </Box>
-          )}
-          {!(isVideoOn && shareScreenStream) && (
-            <Stack flex={1} align={"center"} justify={"center"} h={"full"}>
-              <Avatar
-                name={displayName}
-                size={"xl"}
-                icon={<FiUser size={50} />}
-              />
-            </Stack>
-          )}
-          {isVideoOn && (
-            <Box
-              as="video"
-              muted
-              autoPlay
-              h={"full"}
-              w={"full"}
-              left={0}
-              top={0}
-              ref={videoRef}
-              rounded={"md"}
-              // aspectRatio={"16/9"}
-              objectFit={"contain"}
-              pos={"absolute"}
-            ></Box>
-          )}
-          {shareScreenStream && (
-            <Box
-              as="video"
-              muted
-              autoPlay
-              ref={screenShareRef}
-              h={"full"}
-              w={"full"}
-              left={0}
-              top={0}
-              rounded={"md"}
-              // aspectRatio={"16/9"}
-              objectFit={"contain"}
-              pos={"absolute"}
-            ></Box>
-          )}
-        </>
-      )}
+    <>
       {isIdle && (
         <Flex
           pos={"fixed"}
@@ -304,76 +206,205 @@ export default function LocalPeer(props: Props) {
           <Text fontSize={"20px"}>Waiting...</Text>
         </Flex>
       )}
-      {props.state == "connecting" && (
-        <Flex gap={5} w={"full"} h={"full"} justify={"center"} align={"center"}>
-          <Spinner
-            thickness="4px"
-            speed="0.75s"
-            emptyColor="gray.200"
-            color="teal.500"
-            size="xl"
-          />
-          <Text fontSize={"20px"}>Connecting...</Text>
-        </Flex>
-      )}
-      {/* video controls area */}
-      <HStack
-        pos={"absolute"}
-        bottom={5}
-        left={"50%"}
-        transform={"auto"}
-        translateX={"-50%"}
-        gap={3}
+
+      <Flex
+        flex={1}
+        overflow={"hidden"}
+        pos={"relative"}
+        rounded={"20px"}
+        w={"full"}
+        transition={"ease-in-out"}
+        transitionProperty={"boxShadow"}
+        boxShadow={isSpeaking ? "0 0 0 2px blue" : "none"}
+        bg={"gray.100"}
+        // p={4}
       >
-        <IconButton
-          aria-label={`${isAudioOn ? "disable" : "enable"} mic`}
-          {...controlsBtnStyle}
-          onClick={() => handleControls("audio")}
-        >
-          {isAudioOn ? <FiMic /> : <FiMicOff />}
-          {/* <FiMic /> */}
-          {/* <FiMicOff /> */}
-        </IconButton>
-        <IconButton
-          {...controlsBtnStyle}
-          aria-label={`${isVideoOn ? "disable" : "enable"} video`}
-          onClick={() => handleControls("video")}
-        >
-          {isVideoOn ? <FiVideo /> : <FiVideoOff />}
-          {/* <FiVideoOff /> */}
-        </IconButton>
-        <IconButton
-          {...controlsBtnStyle}
-          aria-label={`${shareScreenStream ? "stop" : "start"} screen share`}
-          onClick={() => handleControls("screen")}
-        >
-          {shareScreenStream ? <LuScreenShare /> : <LuScreenShareOff />}
-          {/* <LuScreenShare /> */}
-          {/* <LuScreenShareOff /> */}
-        </IconButton>
-        {props.local.role === "host" && (
-          <IconButton
-            onClick={() => handleControls("record")}
-            {...controlsBtnStyle}
-            aria-label={`${isRecording ? "stop" : "start"} recording`}
-          >
-            {isRecording ? <BsStopCircle color="red" /> : <BsRecordCircle />}
-          </IconButton>
+        {props.state === "connected" && (
+          <>
+            <HStack
+              zIndex={100}
+              pos={"absolute"}
+              w={"full"}
+              justify={"space-between"}
+              p={3}
+            >
+              <Box
+                rounded={"full"}
+                px={3}
+                py={1}
+                bg={"blackAlpha.400"}
+                backdropFilter={"auto"}
+                backdropBlur={"5px"}
+                color="white"
+              >
+                <Text as={"span"} fontWeight={500}>
+                  {displayName} (You)
+                </Text>
+              </Box>
+              {isHost && (
+                <Flex
+                  rounded={"full"}
+                  align={"center"}
+                  px={3}
+                  py={1}
+                  gap={2}
+                  bg={"blackAlpha.400"}
+                  backdropFilter={"auto"}
+                  backdropBlur={"5px"}
+                  color={"white"}
+                >
+                  <FiStopCircle color="red" />
+                  <Text as={"span"}>Recording...</Text>
+                </Flex>
+              )}
+            </HStack>
+            {shareScreenStream && videoStream && (
+              <Box
+                w={"250px"}
+                zIndex={3}
+                h={"150px"}
+                rounded={"lg"}
+                pos={"absolute"}
+                overflow={"hidden"}
+                top={2}
+                left={2}
+              >
+                <Box
+                  as="video"
+                  muted
+                  autoPlay
+                  ref={miniVideoRef}
+                  h={"full"}
+                  w={"full"}
+                  left={0}
+                  top={0}
+                  // aspectRatio={"16:9"}
+                  objectFit={"cover"}
+                  pos={"absolute"}
+                ></Box>
+              </Box>
+            )}
+            {!(isVideoOn && shareScreenStream) && (
+              <Stack flex={1} align={"center"} justify={"center"} h={"full"}>
+                <Avatar
+                  name={displayName}
+                  size={"xl"}
+                  icon={<FiUser size={50} />}
+                />
+              </Stack>
+            )}
+            {isVideoOn && (
+              <Box
+                as="video"
+                muted
+                autoPlay
+                h={"full"}
+                w={"full"}
+                left={0}
+                top={0}
+                ref={videoRef}
+                rounded={"md"}
+                // aspectRatio={"16/9"}
+                objectFit={"cover"}
+                pos={"absolute"}
+              ></Box>
+            )}
+            {shareScreenStream && (
+              <Box
+                as="video"
+                muted
+                autoPlay
+                ref={screenShareRef}
+                h={"full"}
+                w={"full"}
+                left={0}
+                top={0}
+                rounded={"md"}
+                // aspectRatio={"16/9"}
+                objectFit={"contain"}
+                pos={"absolute"}
+              ></Box>
+            )}
+          </>
         )}
 
-        <IconButton
-          w={"80px"}
-          aria-label="Leave meeting"
-          colorScheme="red"
-          rounded={"full"}
-          fontSize={"20px"}
-          onClick={() => {
-            handleLeaveRoom();
-          }}
+        {props.state == "connecting" && (
+          <Flex
+            gap={5}
+            w={"full"}
+            h={"full"}
+            justify={"center"}
+            align={"center"}
+          >
+            <Spinner
+              thickness="4px"
+              speed="0.75s"
+              emptyColor="gray.200"
+              color="teal.500"
+              size="xl"
+            />
+            <Text fontSize={"20px"}>Connecting...</Text>
+          </Flex>
+        )}
+        {/* video controls area */}
+        <HStack
+          pos={"absolute"}
+          bottom={5}
+          left={"50%"}
+          transform={"auto"}
+          translateX={"-50%"}
+          gap={3}
         >
-          <FiPhone />
-        </IconButton>
-      </HStack>
-    </Flex>
+          <IconButton
+            aria-label={`${isAudioOn ? "disable" : "enable"} mic`}
+            {...controlsBtnStyle}
+            onClick={() => handleControls("audio")}
+          >
+            {isAudioOn ? <FiMic /> : <FiMicOff />}
+            {/* <FiMic /> */}
+            {/* <FiMicOff /> */}
+          </IconButton>
+          <IconButton
+            {...controlsBtnStyle}
+            aria-label={`${isVideoOn ? "disable" : "enable"} video`}
+            onClick={() => handleControls("video")}
+          >
+            {isVideoOn ? <FiVideo /> : <FiVideoOff />}
+            {/* <FiVideoOff /> */}
+          </IconButton>
+          <IconButton
+            {...controlsBtnStyle}
+            aria-label={`${shareScreenStream ? "stop" : "start"} screen share`}
+            onClick={() => handleControls("screen")}
+          >
+            {shareScreenStream ? <LuScreenShare /> : <LuScreenShareOff />}
+            {/* <LuScreenShare /> */}
+            {/* <LuScreenShareOff /> */}
+          </IconButton>
+          {isHost && (
+            <IconButton
+              onClick={() => handleControls("record")}
+              {...controlsBtnStyle}
+              aria-label={`${isRecording ? "stop" : "start"} recording`}
+            >
+              {isRecording ? <BsStopCircle color="red" /> : <BsRecordCircle />}
+            </IconButton>
+          )}
+
+          <IconButton
+            w={"80px"}
+            aria-label="Leave meeting"
+            colorScheme="red"
+            rounded={"full"}
+            fontSize={"20px"}
+            onClick={() => {
+              handleLeaveRoom();
+            }}
+          >
+            <FiPhone />
+          </IconButton>
+        </HStack>
+      </Flex>
+    </>
   );
 }
