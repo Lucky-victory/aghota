@@ -78,16 +78,14 @@ export const ChatArea = () => {
         {messages.map((message, i) => {
           return isLocalPeer(message.sender) ? (
             <Stack
+              gap={1}
               key={"chat" + i}
-              bg={"blue.50"}
-              shadow={"sm"}
               alignSelf={"flex-end"}
-              p={2}
+              p={3}
               maxW={"280px"}
-              roundedBottomRight={"25px"}
-              roundedLeft={"25px"}
             >
               <HStack
+                gap={1}
                 align={"flex-start"}
                 fontSize={"13px"}
                 justify={"space-between"}
@@ -99,17 +97,24 @@ export const ChatArea = () => {
                   {format(message.timestamp, "hh:mm aaa")}
                 </Text>
               </HStack>
-              <Text fontSize={"15px"}>{message.text}</Text>
+              <Text
+                py={1}
+                px={3}
+                bg={"blue.50"}
+                roundedBottomRight={"35px"}
+                roundedLeft={"35px"}
+                shadow={"sm"}
+                fontSize={"15px"}
+              >
+                {message.text}
+              </Text>
             </Stack>
           ) : (
             <Stack
-              bg={"white"}
               // shadow={"sm"}
               alignSelf={"flex-start"}
               p={2}
               maxW={"280px"}
-              roundedBottomLeft={"25px"}
-              roundedRight={"25px"}
             >
               <HStack
                 align={"flex-start"}
@@ -123,7 +128,17 @@ export const ChatArea = () => {
                   {format(message.timestamp, "hh:mm aaa")}
                 </Text>
               </HStack>
-              <Text fontSize={"14px"}>{message.text}</Text>
+              <Text
+                py={1}
+                px={3}
+                bg={"blue.50"}
+                roundedBottomLeft={"35px"}
+                roundedRight={"35px"}
+                shadow={"sm"}
+                fontSize={"15px"}
+              >
+                {message.text}
+              </Text>
             </Stack>
           );
         })}

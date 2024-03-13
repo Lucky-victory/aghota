@@ -27,15 +27,7 @@ export const localPeerSlice = createSlice({
 
 const remotePeersInitialState: { peerIds: string[]; peers: PeerState[] } = {
   peerIds: [] as string[],
-  peers: [
-    {
-      peerId: "",
-      metadata: {
-        displayName: "",
-        avatarUrl: "",
-      },
-    },
-  ],
+  peers: [],
 };
 export const remotePeersSlice = createSlice({
   name: "remotePeers",
@@ -43,7 +35,7 @@ export const remotePeersSlice = createSlice({
   reducers: {
     updateRemotePeer: (state, action: PayloadAction<PeerState>) => {
       const { peerId, ...peerData } = action.payload;
-      const isExisting = state.peers.find((p) => p.peerId === peerId);
+      const isExisting = state.peers.find((p) => p?.peerId === peerId);
       if (isExisting) {
         const updatedPeers = state.peers.map((p) => {
           if (p.peerId === peerId) {
@@ -55,28 +47,20 @@ export const remotePeersSlice = createSlice({
       } else {
         const newUser = { peerId, ...peerData }; // Creating a new user with provided data
         state.peers.push(newUser);
-        return { ...state, peers: [...state.peers, newUser] };
+        // return { ...state, peers: [...state.peers, newUser] };
       }
     },
     // addRemotePeer:(state,action)=>{
     // state.peers.push(action.)
     // },
-    updateRemotePeerIds: (state, action: PayloadAction<string>) => {
-      state.peerIds.push(action.payload);
+    updateRemotePeerIds: (state, action: PayloadAction<string[]>) => {
+      state.peerIds = action.payload;
     },
   },
 });
 const lobbyPeersInitialState: { peerIds: string[]; peers: PeerState[] } = {
   peerIds: [] as string[],
-  peers: [
-    {
-      peerId: "",
-      metadata: {
-        displayName: "",
-        avatarUrl: "",
-      },
-    },
-  ],
+  peers: [],
 };
 export const lobbyPeersSlice = createSlice({
   name: "lobbyPeers",
@@ -84,7 +68,7 @@ export const lobbyPeersSlice = createSlice({
   reducers: {
     updateLobbyPeer: (state, action: PayloadAction<PeerState>) => {
       const { peerId, ...peerData } = action.payload;
-      const isExisting = state.peers.find((p) => p.peerId === peerId);
+      const isExisting = state.peers.find((p) => p?.peerId === peerId);
       if (isExisting) {
         const updatedPeers = state.peers.map((p) => {
           if (p.peerId === peerId) {
@@ -96,14 +80,14 @@ export const lobbyPeersSlice = createSlice({
       } else {
         const newUser = { peerId, ...peerData }; // Creating a new user with provided data
         state.peers.push(newUser);
-        return { ...state, peers: [...state.peers, newUser] };
+        // return { ...state, peers: [...state.peers, newUser] };
       }
     },
     // addRemotePeer:(state,action)=>{
     // state.peers.push(action.)
     // },
-    updateLobbyPeerIds: (state, action: PayloadAction<string>) => {
-      state.peerIds.push(action.payload);
+    updateLobbyPeerIds: (state, action: PayloadAction<string[]>) => {
+      state.peerIds = action.payload;
     },
   },
 });

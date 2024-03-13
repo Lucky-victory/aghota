@@ -54,18 +54,26 @@ import RemotePeer from "@/components/RemotePeer";
 import LocalPeer from "@/components/LocalPeer";
 import { ChatArea } from "@/components/ChatArea";
 import isEmpty from "just-is-empty";
-import { useAppDispatch } from "../../state/store";
+import { RootState, useAppDispatch } from "../../state/store";
 import {
   updateLobbyPeer,
+  updateLobbyPeerIds,
   updateRemotePeer,
   updateRemotePeerIds,
 } from "@/state/slices";
+import { useSelector } from "react-redux";
 
 export type TPeerMetadata = {
   displayName: string;
 };
-export default function MeetPage() {
+interface Props {
+  token: string;
+}
+export default function MeetPage({ token }: Props) {
   const dispatch = useAppDispatch();
+  const remotePeersInState = useSelector(
+    (state: RootState) => state.remote.peerIds
+  );
   const participantsCardStyle = {
     overflow: "hidden",
     minW: 200,
@@ -80,8 +88,12 @@ export default function MeetPage() {
   if (typeof window !== "undefined") {
     roomToken = window.localStorage.getItem("roomToken") as string;
   }
-  const lobbyPeers = useLobby();
-  console.log({ lobbyPeers });
+  const lobbyPeers = useLobby({
+    onLobbyPeersUpdated: (lobbyPeers) => {
+      dispatch(updateLobbyPeerIds(lobbyPeers));
+    },
+  });
+  console.log({ lobbyPeers, token });
 
   const activePeers = useActivePeers();
   const router = useRouter();
@@ -112,15 +124,13 @@ export default function MeetPage() {
           metadata: { displayName: "Mike" },
         })
       );
-      dispatch(updateRemotePeerIds(peerId));
+      dispatch(updateRemotePeerIds([...remotePeersInState, peerId]));
       console.log("onPeerJoin", peerId);
     },
   });
 
   const { joinRoom, state, room, muteEveryone, leaveRoom } = roomInstance;
-  console.log({
-    peers: room.lobbyPeers,
-  });
+
   const {
     enableVideo,
     isVideoOn,
@@ -150,9 +160,6 @@ export default function MeetPage() {
     }
   }, [shareScreenStream]);
 
-  useEffect(() => {
-    console.log({ lobbys: lobbyPeers });
-  }, [lobbyPeers.lobbyPeersIds?.length]);
   async function handleJoinRoom(token?: string) {
     try {
       await joinRoom({
@@ -163,17 +170,17 @@ export default function MeetPage() {
       console.log("Error while joining room", { error });
     }
   }
-  useEffect(() => {
-    const fetcher = async () => {
-      if (!isEmpty(roomToken) && roomId) {
-        await joinRoom({
-          roomId: roomId as string,
-          token: roomToken,
-        });
-      }
-    };
-    fetcher();
-  }, [roomId, roomToken]);
+  // useEffect(() => {
+  //   const fetcher = async () => {
+  //     if (!isEmpty(roomToken) && roomId) {
+  //       await joinRoom({
+  //         roomId: roomId as string,
+  //         token: roomToken,
+  //       });
+  //     }
+  //   };
+  //   fetcher();
+  // }, [roomId, roomToken]);
 
   async function handleCreateNewToken() {
     console.log("handleCreateNewMeeting");
@@ -185,10 +192,6 @@ export default function MeetPage() {
         }
       );
       const data = response.data;
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("roomToken", data.token);
-      }
-      console.log({ data });
 
       setDisplayName(data?.metadata?.displayName);
       await handleJoinRoom(data?.token);
@@ -222,11 +225,11 @@ export default function MeetPage() {
   }
   return (
     <Flex as="main" minH={"var(--chakra-vh)"} bg={"gray.100"} p={2}>
-      {!roomToken && (
+      {
         <Box>
-          <Button onClick={() => handleCreateNewToken()}>Join room</Button>
+          <Button onClick={() => handleJoinRoom(token)}>Join room</Button>
         </Box>
-      )}
+      }
       <Flex direction={"column"} gap={2} flex={1} minH={"full"}>
         <HStack
           justify={"space-between"}
@@ -257,7 +260,9 @@ export default function MeetPage() {
 
               <FiUsers />
             </Button>
-            <NewPeerRequest room={room} peerId={""} />
+            {lobbyPeers.lobbyPeersIds.length > 0 && (
+              <NewPeerRequest room={room} peerId={""} />
+            )}
           </HStack>
         </HStack>
 
@@ -324,3 +329,24 @@ export default function MeetPage() {
     </Flex>
   );
 }
+import { GetServerSidePropsContext } from "next";
+import { AccessToken, Role } from "@huddle01/server-sdk/auth";
+
+export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
+  let token = "";
+
+  const roomId = ctx.params?.roomId?.toString();
+  const { data } = await axios.post(
+    "/api/create-admin-token",
+    {
+      metadata: { displayName: "Vick" },
+    },
+    { params: { roomId } }
+  );
+  token = data?.token;
+  console.log({ token, data });
+
+  return {
+    props: { token },
+  };
+};

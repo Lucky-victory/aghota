@@ -1,5 +1,5 @@
 import { Box, HStack, IconButton, Text } from "@chakra-ui/react";
-import { useRoom } from "@huddle01/react/hooks";
+
 import { Room } from "@huddle01/web-core";
 import { FiCheck, FiSlash } from "react-icons/fi";
 
@@ -23,7 +23,10 @@ export default function NewPeerRequest({
           <Text as={"span"} fontWeight={500}>
             Mary
           </Text>{" "}
-          wants to join the meeting
+          {/* wants to join the meeting */}
+          {room.lobbyPeerIds.map((peerId) => {
+            return <Text key={peerId}>{peerId} wants to join</Text>;
+          })}
         </Text>
         <HStack>
           <IconButton

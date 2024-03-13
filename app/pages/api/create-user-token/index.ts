@@ -15,10 +15,10 @@ export default async function handler(
   const accessToken = new AccessToken({
     apiKey: process.env.HUDDLE_API_KEY!,
     roomId: roomId as string,
-    role: Role.LISTENER,
     options: { metadata: metadata },
+    role: Role.HOST,
     permissions: {
-      admin: false,
+      admin: true,
       canConsume: true,
       canProduce: true,
       canProduceSources: {
@@ -28,7 +28,7 @@ export default async function handler(
       },
       canRecvData: true,
       canSendData: true,
-      canUpdateMetadata: false,
+      canUpdateMetadata: true,
     },
   });
 

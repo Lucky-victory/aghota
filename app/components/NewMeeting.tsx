@@ -27,13 +27,11 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
       const token = data?.token;
       console.log("create admin token");
       try {
-        const response = await axios.post(
-          `/api/create-admin-token?roomId=${roomId}`
-        );
-        const data = response.data;
-        if (typeof window !== "undefined") {
-          window.localStorage.setItem("roomToken", data.token);
-        }
+        // const response = await axios.post(
+        //   `/api/create-admin-token?roomId=${roomId}`
+        // );
+        // const data = response.data;
+      
         router.push(`/meet/${roomId}`);
 
         //  await handleJoinRoom(data?.token);

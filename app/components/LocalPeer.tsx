@@ -1,4 +1,3 @@
-import { TPeerMetadata } from "@/pages/meet/[roomId]";
 import {
   Avatar,
   Box,
@@ -109,7 +108,7 @@ export default function LocalPeer(props: Props) {
     });
   }
 
-  async function handleEvents(
+  async function handleControls(
     type: "audio" | "video" | "screen" | "record" | "muteAll"
   ) {
     switch (type) {
@@ -281,7 +280,20 @@ export default function LocalPeer(props: Props) {
         </>
       )}
       {isIdle && (
-        <Flex gap={5} w={"full"} h={"full"} justify={"center"} align={"center"}>
+        <Flex
+          pos={"fixed"}
+          top={0}
+          left={0}
+          gap={5}
+          backdropBlur={"15px"}
+          backdropFilter={"auto"}
+          bg={"blackAlpha.600"}
+          w={"full"}
+          h={"full"}
+          zIndex={100}
+          justify={"center"}
+          align={"center"}
+        >
           <Spinner
             thickness="4px"
             speed="0.75s"
@@ -316,7 +328,7 @@ export default function LocalPeer(props: Props) {
         <IconButton
           aria-label={`${isAudioOn ? "disable" : "enable"} mic`}
           {...controlsBtnStyle}
-          onClick={() => handleEvents("audio")}
+          onClick={() => handleControls("audio")}
         >
           {isAudioOn ? <FiMic /> : <FiMicOff />}
           {/* <FiMic /> */}
@@ -325,7 +337,7 @@ export default function LocalPeer(props: Props) {
         <IconButton
           {...controlsBtnStyle}
           aria-label={`${isVideoOn ? "disable" : "enable"} video`}
-          onClick={() => handleEvents("video")}
+          onClick={() => handleControls("video")}
         >
           {isVideoOn ? <FiVideo /> : <FiVideoOff />}
           {/* <FiVideoOff /> */}
@@ -333,7 +345,7 @@ export default function LocalPeer(props: Props) {
         <IconButton
           {...controlsBtnStyle}
           aria-label={`${shareScreenStream ? "stop" : "start"} screen share`}
-          onClick={() => handleEvents("screen")}
+          onClick={() => handleControls("screen")}
         >
           {shareScreenStream ? <LuScreenShare /> : <LuScreenShareOff />}
           {/* <LuScreenShare /> */}
@@ -341,7 +353,7 @@ export default function LocalPeer(props: Props) {
         </IconButton>
         {props.local.role === "host" && (
           <IconButton
-            onClick={() => handleEvents("record")}
+            onClick={() => handleControls("record")}
             {...controlsBtnStyle}
             aria-label={`${isRecording ? "stop" : "start"} recording`}
           >

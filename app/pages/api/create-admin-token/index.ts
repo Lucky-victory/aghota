@@ -8,6 +8,8 @@ export default async function handler(
 ) {
   const { roomId } = req.query;
   const { metadata = {} } = req.body;
+  console.log("Here api", { roomId, metadata });
+
   if (!roomId) {
     return res.status(400).json({ error: "roomId is required" });
   }
