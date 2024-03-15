@@ -31,10 +31,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 // when a room is created, create a token for the room creator as admin
 export const createTokenForAdmin = async (roomId: string, metadata?: any) => {
   try {
-    if (!roomId) {
-      throw new Error("roomId is required");
-    }
-
     const accessToken = new AccessToken({
       apiKey: process.env.HUDDLE_API_KEY!,
       roomId: roomId as string,

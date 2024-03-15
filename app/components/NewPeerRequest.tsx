@@ -1,8 +1,9 @@
 import { TPeerMetadata } from "@/pages/meet/[roomId]";
-import { Box, HStack, IconButton, Text } from "@chakra-ui/react";
+import { Box, Button, HStack, IconButton, Text } from "@chakra-ui/react";
 
 import { Room } from "@huddle01/web-core";
-import { FiCheck, FiSlash } from "react-icons/fi";
+import { FiCheck, FiSlash, FiUsers } from "react-icons/fi";
+import { LuUsers, LuUsers2 } from "react-icons/lu";
 
 export default function NewPeerRequest({
   room,
@@ -36,7 +37,7 @@ export default function NewPeerRequest({
             <Text as={"span"} fontWeight={500}>
               {getLobbyPeerMeta(peerId).metadata?.displayName}
             </Text>
-            <Text as={"span"}>wants to join</Text>
+            <Text as={"span"}> wants to join</Text>
           </Text>
           <HStack>
             <IconButton

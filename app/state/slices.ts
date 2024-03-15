@@ -14,6 +14,21 @@ const peerInitialState: PeerState = {
     avatarUrl: "",
   },
 };
+export const meetingCreator = createSlice({
+  name: "meeting-creator",
+  initialState: {
+    isCreator: false,
+    token: "",
+  },
+  reducers: {
+    update: (
+      state,
+      action: PayloadAction<{ isCreator: boolean; token?: string }>
+    ) => {
+      state.isCreator = action.payload?.isCreator;
+    },
+  },
+});
 export const localPeerSlice = createSlice({
   name: "localPeer",
   initialState: peerInitialState,
@@ -96,3 +111,4 @@ export const { updateLocalPeer } = localPeerSlice.actions;
 export const { updateRemotePeer, updateRemotePeerIds } =
   remotePeersSlice.actions;
 export const { updateLobbyPeer, updateLobbyPeerIds } = lobbyPeersSlice.actions;
+export const { update } = meetingCreator.actions;

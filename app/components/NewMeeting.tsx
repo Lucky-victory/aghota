@@ -1,3 +1,5 @@
+import { update } from "@/state/slices";
+import { useAppDispatch } from "@/state/store";
 import { Box, Button, Flex, HStack, Heading, Input } from "@chakra-ui/react";
 import axios from "axios";
 import { useRouter, NextRouter } from "next/router";
@@ -8,7 +10,7 @@ import { FiVideo } from "react-icons/fi";
 export default function NewMeeting({ router }: { router: NextRouter }) {
   const [meetingTitle, setMeetingTitle] = useState("");
   const [isSending, setIsSending] = useState(false);
-
+  const dispatch = useAppDispatch();
   async function handleCreateNewMeeting() {
     let roomId = "";
     try {
@@ -18,25 +20,13 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
         "/api/create-room",
         {
           title: meetingTitle,
-          userMeta: { displayName: "Victory" },
         }
       );
       const { data } = response;
       roomId = data?.roomId;
-      const token = data?.token;
 
-      try {
-        // const response = await axios.post(
-        //   `/api/create-admin-token?roomId=${roomId}`
-        // );
-        // const data = response.data;
-
-        router.push(`/meet/${roomId}?rc=1`);
-
-        //  await handleJoinRoom(data?.token);
-      } catch (error) {
-        console.log("Error creating admin token", { error });
-      }
+      router.push(`/meet/${roomId}`);
+      dispatch(update({ isCreator: true,token: data?.token}));
       setIsSending(false);
     } catch (error) {
       console.log("Error creating room", { error });

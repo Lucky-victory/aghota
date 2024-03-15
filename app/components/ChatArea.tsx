@@ -143,7 +143,7 @@ export const ChatArea = ({ room }: { room: Room }) => {
           </IconButton>
         </HStack>
         <Stack
-          gap={1}
+          gap={0}
           flex={1}
           px={1}
           // bg={"white"}

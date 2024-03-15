@@ -31,6 +31,7 @@ import RemotePeer from "@/components/RemotePeer";
 import LocalPeer from "@/components/LocalPeer";
 import { ChatArea } from "@/components/ChatArea";
 import { RootState, useAppDispatch } from "../../state/store";
+import isEmpty from "just-is-empty";
 import {
   updateLobbyPeerIds,
   updateRemotePeer,
@@ -50,23 +51,9 @@ export default function MeetPage({ token }: Props) {
   const remotePeersInState = useSelector(
     (state: RootState) => state.remote.peerIds
   );
-
-  const participantsCardStyle = {
-    overflow: "hidden",
-    minW: 200,
-    flex: 1,
-    h: "full",
-    bg: "gray.200",
-    rounded: "20px",
-    pos: "relative" as ResponsiveValue<"relative">,
-    maxW: 300,
-  };
-
-  const lobbyPeers = useLobby({
-    onLobbyPeersUpdated: (lobbyPeers) => {
-      dispatch(updateLobbyPeerIds(lobbyPeers));
-    },
-  });
+  const meetingCreator = useSelector(
+    (state: RootState) => state.meetingCreator
+  );
 
   const activePeers = useActivePeers();
 
@@ -90,7 +77,6 @@ export default function MeetPage({ token }: Props) {
     },
     onWaiting(data) {
       setLobbyPeersIds(room.lobbyPeerIds);
-      console.log({ data, wait: room.lobbyPeerIds }, "on waiting");
     },
     onPeerJoin: (peerId) => {
       dispatch(
@@ -107,6 +93,7 @@ export default function MeetPage({ token }: Props) {
   const { joinRoom, state, room, muteEveryone, leaveRoom } = roomInstance;
   console.log({ roomMeta: room.getMetadata() });
   const isIdle = state === "idle";
+  const { roomId } = router.query;
 
   const {
     enableVideo,
@@ -126,7 +113,6 @@ export default function MeetPage({ token }: Props) {
     peerId: localPeerId,
   } = useLocalPeer<TPeerMetadata>();
   const { peerIds } = usePeerIds();
-  const roomId = router.query.roomId as string;
   // const remotePeer=useRemotePeer()
   useEffect(() => {
     if (!shareScreenStream && videoStream && videoRef.current) {
@@ -153,60 +139,34 @@ export default function MeetPage({ token }: Props) {
   }
   // useEffect(() => {
   //   const fetcher = async () => {
-  //     if (!isEmpty(roomToken) && roomId) {
-  //       await joinRoom({
-  //         roomId: roomId as string,
-  //         token: roomToken,
-  //       });
-  //     }
+  //     await handleCreateNewToken();
   //   };
   //   fetcher();
-  // }, [roomId, roomToken]);
+  // }, []);
 
   async function handleCreateNewToken() {
     console.log("handleCreateToken");
     try {
       setIsJoining(true);
-      const response = await axios.post(
-        `/api/create-user-token?roomId=${roomId}`,
-        {
-          metadata: { displayName: displayName },
-        }
-      );
-      const data = response.data;
-      console.log({ data });
+      if (meetingCreator.isCreator && meetingCreator.token) {
+        await handleJoinRoom(meetingCreator.token);
+        return;
+      } else {
+        const response = await axios.post(
+          `/api/create-token?roomId=${roomId}&isCreator=${meetingCreator.isCreator}`,
+          {
+            metadata: { displayName: displayName },
+          }
+        );
+        const data = response.data;
 
-      setDisplayName(data?.metadata?.displayName);
-      await handleJoinRoom(data?.token);
+        setDisplayName(data?.metadata?.displayName);
+        await handleJoinRoom(data?.token);
+      }
       setIsJoining(false);
     } catch (error) {}
   }
 
-  async function handleEvents(type: "audio" | "video" | "screen") {
-    switch (type) {
-      case "audio":
-        try {
-          isAudioOn ? await disableAudio() : await enableAudio();
-        } catch (error) {}
-
-        break;
-      case "video":
-        try {
-          isVideoOn ? await disableVideo() : await enableVideo();
-        } catch (error) {}
-        break;
-      case "screen":
-        try {
-          shareScreenStream
-            ? await stopScreenShare()
-            : await startScreenShare();
-        } catch (error) {}
-        break;
-
-      default:
-        break;
-    }
-  }
   return (
     <Flex as="main" minH={"var(--chakra-vh)"} bg={"gray.100"} p={2}>
       {isIdle && (
@@ -237,47 +197,13 @@ export default function MeetPage({ token }: Props) {
             onClick={async () => await handleCreateNewToken()}
             colorScheme="teal"
           >
-            Ask to Join
+            {meetingCreator.isCreator ? "Start Meeting" : "Ask to Join"}
           </Button>
         </Stack>
       )}
       {!isIdle && (
         <Flex direction={"column"} gap={2} flex={1} minH={"full"}>
-          <HStack
-            justify={"space-between"}
-            gap={5}
-            bg={"white"}
-            rounded={"full"}
-            py={2}
-            px={3}
-          >
-            <Box>
-              <Heading size={"md"}>Meeting Title</Heading>
-            </Box>
-            <HStack>
-              <Button
-                mr={3}
-                colorScheme="teal"
-                variant={"ghost"}
-                pos={"relative"}
-                rounded={"full"}
-                aria-label="active peers"
-              >
-                <Badge
-                  colorScheme="teal"
-                  top={"-2px"}
-                  right={2}
-                  pos={"absolute"}
-                ></Badge>
-
-                <FiUsers />
-              </Button>
-              {lobbyPeers.lobbyPeersIds.length > 0 && (
-                <NewPeerRequest room={room} peerId={""} />
-              )}
-            </HStack>
-          </HStack>
-
+          <MeetingHeader room={room} />
           <Flex h={"full"} bg={"white"} rounded={"30px"} p={2} gap={3}>
             {/* video area */}
             <Flex flexDir={"column"} gap={3} flex={1} minH={"full"}>
@@ -324,6 +250,8 @@ export default function MeetPage({ token }: Props) {
 }
 import { GetServerSidePropsContext } from "next";
 import { AccessToken, Role } from "@huddle01/server-sdk/auth";
+import MeetingHeader from "@/components/MeetingHeader";
+import { meetingCreator } from "../../state/slices";
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   let token = "";
