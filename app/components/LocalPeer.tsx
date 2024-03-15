@@ -39,6 +39,7 @@ export interface Props {
       updateSize: (size: number) => void;
     };
     localPeerId: string;
+    displayName: string;
   };
   room: Room;
   state: RoomStates;
@@ -57,7 +58,7 @@ export default function LocalPeer(props: Props) {
 
   const isHost = props.local.role === "host";
   const router = useRouter();
-  const [displayName, setDisplayName] = useState<string>("Lucky");
+  // const [displayName, setDisplayName] = useState<string>("Lucky");
   const videoRef = useRef<HTMLVideoElement>(null);
   const miniVideoRef = useRef<HTMLVideoElement>(null);
   const screenShareRef = useRef<HTMLVideoElement>(null);
@@ -238,7 +239,7 @@ export default function LocalPeer(props: Props) {
                 color="white"
               >
                 <Text as={"span"} fontWeight={500}>
-                  {displayName} (You)
+                  {props.local?.displayName} (You)
                 </Text>
               </Box>
               {isHost && (
@@ -287,7 +288,7 @@ export default function LocalPeer(props: Props) {
             {!(isVideoOn && shareScreenStream) && (
               <Stack flex={1} align={"center"} justify={"center"} h={"full"}>
                 <Avatar
-                  name={displayName}
+                  name={props?.local?.displayName}
                   size={"xl"}
                   icon={<FiUser size={50} />}
                 />
@@ -377,7 +378,7 @@ export default function LocalPeer(props: Props) {
             aria-label={`${shareScreenStream ? "stop" : "start"} screen share`}
             onClick={() => handleControls("screen")}
           >
-            {shareScreenStream ? <LuScreenShare /> : <LuScreenShareOff />}
+            {shareScreenStream ? <LuScreenShareOff /> : <LuScreenShare />}
             {/* <LuScreenShare /> */}
             {/* <LuScreenShareOff /> */}
           </IconButton>

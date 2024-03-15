@@ -8,6 +8,8 @@ import {
   ResponsiveValue,
   Badge,
   Button,
+  Input,
+  Stack,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useRouter } from "next/router";
@@ -21,6 +23,7 @@ import {
   useRoom,
   useActivePeers,
   useLobby,
+  useRemotePeer,
 } from "@huddle01/react/hooks";
 import { useEffect, useRef, useState } from "react";
 import NewPeerRequest from "@/components/NewPeerRequest";
@@ -37,6 +40,7 @@ import { useSelector } from "react-redux";
 
 export type TPeerMetadata = {
   displayName: string;
+  avatarUrl?: string;
 };
 interface Props {
   token: string;
@@ -67,15 +71,16 @@ export default function MeetPage({ token }: Props) {
   const activePeers = useActivePeers();
 
   const router = useRouter();
-  const [displayName, setDisplayName] = useState<string>("Lucky");
+  const [displayName, setDisplayName] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement>(null);
   const screenShareRef = useRef<HTMLVideoElement>(null);
   const [lobbyPeersIds, setLobbyPeersIds] = useState<string[]>([]);
   const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [isJoining, setIsJoining] = useState<boolean>(false);
 
   const roomInstance = useRoom({
     onFailed(data) {
-      console.log("Failed to join room", data);
+      console.log("Failed to join room", { data });
     },
     onJoin: (data) => {
       // data.room
@@ -91,7 +96,7 @@ export default function MeetPage({ token }: Props) {
       dispatch(
         updateRemotePeer({
           peerId,
-          metadata: { displayName: "Mike" },
+          metadata: { displayName: displayName },
         })
       );
       dispatch(updateRemotePeerIds([...remotePeersInState, peerId]));
@@ -100,6 +105,7 @@ export default function MeetPage({ token }: Props) {
   });
 
   const { joinRoom, state, room, muteEveryone, leaveRoom } = roomInstance;
+  console.log({ roomMeta: room.getMetadata() });
   const isIdle = state === "idle";
 
   const {
@@ -136,6 +142,7 @@ export default function MeetPage({ token }: Props) {
 
   async function handleJoinRoom(token?: string) {
     try {
+      // setIsJoining(true);
       await joinRoom({
         roomId: roomId as string,
         token: token as string,
@@ -157,18 +164,21 @@ export default function MeetPage({ token }: Props) {
   // }, [roomId, roomToken]);
 
   async function handleCreateNewToken() {
-    console.log("handleCreateNewMeeting");
+    console.log("handleCreateToken");
     try {
+      setIsJoining(true);
       const response = await axios.post(
         `/api/create-user-token?roomId=${roomId}`,
         {
-          displayName: "Mark Emy",
+          metadata: { displayName: displayName },
         }
       );
       const data = response.data;
+      console.log({ data });
 
       setDisplayName(data?.metadata?.displayName);
       await handleJoinRoom(data?.token);
+      setIsJoining(false);
     } catch (error) {}
   }
 
@@ -200,9 +210,36 @@ export default function MeetPage({ token }: Props) {
   return (
     <Flex as="main" minH={"var(--chakra-vh)"} bg={"gray.100"} p={2}>
       {isIdle && (
-        <Box>
-          <Button onClick={() => handleJoinRoom(token)}>Join room</Button>
-        </Box>
+        <Stack
+          gap={4}
+          minW={300}
+          shadow={"md"}
+          mx={"auto"}
+          alignSelf={"center"}
+          py={8}
+          px={6}
+          rounded={"md"}
+        >
+          <Box>
+            <Heading mb={2} size={"sm"} fontWeight={500}>
+              Enter your name:
+            </Heading>
+            <Input
+              colorScheme="teal"
+              placeholder="John doe"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+            />
+          </Box>
+          <Button
+            isDisabled={!displayName || displayName.length < 2}
+            isLoading={isJoining}
+            onClick={async () => await handleCreateNewToken()}
+            colorScheme="teal"
+          >
+            Ask to Join
+          </Button>
+        </Stack>
       )}
       {!isIdle && (
         <Flex direction={"column"} gap={2} flex={1} minH={"full"}>
@@ -247,6 +284,7 @@ export default function MeetPage({ token }: Props) {
               <LocalPeer
                 {...roomInstance}
                 local={{
+                  displayName: displayName,
                   role: role,
                   activePeers,
                   localPeerId: localPeerId as string,
@@ -276,14 +314,8 @@ export default function MeetPage({ token }: Props) {
             </Flex>
 
             {/* chat area */}
-            <Box
-              overflow={"hidden"}
-              w={"350px"}
-              bg={"gray.100"}
-              rounded={"30px"}
-            >
-              <ChatArea />
-            </Box>
+
+            <ChatArea room={room} />
           </Flex>
         </Flex>
       )}
@@ -319,6 +351,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     };
   } else {
     role = Role.LISTENER;
+
     permissions = {
       canConsume: true,
       canProduce: true,
@@ -337,6 +370,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const accessToken = new AccessToken({
     apiKey: process.env.HUDDLE_API_KEY!,
     roomId: roomId as string,
+    options: { metadata: { displayName: "mike" } },
     role,
     permissions,
   });

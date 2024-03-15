@@ -16,9 +16,9 @@ export default async function handler(
     apiKey: process.env.HUDDLE_API_KEY!,
     roomId: roomId as string,
     options: { metadata: metadata },
-    role: Role.HOST,
+    role: Role.LISTENER,
     permissions: {
-      admin: true,
+      admin: false,
       canConsume: true,
       canProduce: true,
       canProduceSources: {

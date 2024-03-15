@@ -3,11 +3,14 @@ import {
   Avatar,
   Box,
   Flex,
+  HStack,
   IconButton,
   ResponsiveValue,
+  Text,
 } from "@chakra-ui/react";
 import {
   useRemoteAudio,
+  useRemotePeer,
   useRemoteScreenShare,
   useRemoteVideo,
 } from "@huddle01/react/hooks";
@@ -15,6 +18,7 @@ import { Audio, Video } from "@huddle01/react/components";
 import React, { useEffect, useRef, useState } from "react";
 import { FiMic, FiMicOff, FiUser } from "react-icons/fi";
 import { useSelector } from "react-redux";
+import { TPeerMetadata } from "@/pages/meet/[roomId]";
 
 type Props = {
   peerId: string;
@@ -26,6 +30,7 @@ type Props = {
 };
 
 const RemotePeer = ({ peerId, activePeers }: Props) => {
+  const remotePeer = useRemotePeer<TPeerMetadata>({ peerId });
   const { stream: videoStream, state } = useRemoteVideo({ peerId });
   const { stream: audioStream, state: audioState } = useRemoteAudio({ peerId });
   const remoteState = useSelector((state: RootState) => state.remote);
@@ -59,7 +64,7 @@ const RemotePeer = ({ peerId, activePeers }: Props) => {
     } else {
       setIsSpeaking(false);
     }
-    console.log("from remote", { isSpeaking, activePeers });
+    // console.log("from remote", { isSpeaking, activePeers });
   }, [dominantSpeakerId, activePeerIds, peerId, audioStream]);
 
   // useEffect(() => {
@@ -139,32 +144,55 @@ const RemotePeer = ({ peerId, activePeers }: Props) => {
       {...participantsCardStyle}
       boxShadow={isSpeaking ? "0 0 0 2px blue" : "none"}
     >
-      <IconButton
-        zIndex={10}
-        pos={"absolute"}
-        aria-label="enable or disable mic"
-        bg={"rgba(0,0,0,0.4)"}
-        _hover={{
-          bg: "rgba(0,0,0,0.71)",
-        }}
-        rounded={"full"}
-        color={"white"}
-        fontSize={"14px"}
-        p={1}
+      <HStack
         top={1}
-        right={2}
-        w={"auto"}
-        h={"auto"}
+        // right={2}
+        justify={"space-between"}
+        zIndex={10}
+        px={2}
+        pos={"absolute"}
+        w={"full"}
       >
-        {audioStream ? <FiMic /> : <FiMicOff />}
-      </IconButton>
+        {remotePeer.metadata && (
+          <Text
+            as={"span"}
+            fontSize={"14px"}
+            px={2}
+            rounded={"full"}
+            color={"white"}
+            bg={"rgba(0,0,0,0.4)"}
+            backdropFilter={"auto"}
+            backdropBlur={"10px"}
+          >
+            {remotePeer.metadata.displayName}
+          </Text>
+        )}
+        <IconButton
+          aria-label={audioStream ? "mic is on" : "mic is off"}
+          bg={"rgba(0,0,0,0.4)"}
+          _hover={{
+            bg: "rgba(0,0,0,0.71)",
+          }}
+          backdropBlur={"10px"}
+          rounded={"full"}
+          color={"white"}
+          pointerEvents={"none"}
+          fontSize={"14px"}
+          p={1}
+          w={"auto"}
+          h={"auto"}
+        >
+          {audioStream ? <FiMic /> : <FiMicOff />}
+        </IconButton>
+      </HStack>
       {!videoStream && !screenShareVideo && (
         <Flex h={"full"} justify={"center"} align={"center"}>
           <Avatar
+            name={remotePeer.metadata?.displayName}
             icon={<FiUser />}
             fontSize={"40px"}
             size={"lg"}
-            bg={"gray.400"}
+            bg={!remotePeer.metadata?.displayName ? "gray.400" : undefined}
           />
         </Flex>
       )}
@@ -176,7 +204,7 @@ const RemotePeer = ({ peerId, activePeers }: Props) => {
           as={Video}
           muted
           autoPlay
-          ref={vidRef}
+          // ref={vidRef}
           h={"full"}
           w={"full"}
           left={0}
@@ -189,10 +217,11 @@ const RemotePeer = ({ peerId, activePeers }: Props) => {
       )}
       {screenShareVideo && (
         <Box
-          as="video"
           muted
           autoPlay
-          ref={screenVideoRef}
+          stream={screenShareVideo}
+          as={Video}
+          // ref={screenVideoRef}
           h={"full"}
           w={"full"}
           left={0}

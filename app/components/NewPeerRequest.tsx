@@ -1,3 +1,4 @@
+import { TPeerMetadata } from "@/pages/meet/[roomId]";
 import { Box, HStack, IconButton, Text } from "@chakra-ui/react";
 
 import { Room } from "@huddle01/web-core";
@@ -8,7 +9,7 @@ export default function NewPeerRequest({
   peerId,
 }: {
   room: Room;
-  peerId: string;
+  peerId?: string;
 }) {
   function acceptPeer(peerId: string) {
     room.admitPeer(peerId);
@@ -16,6 +17,10 @@ export default function NewPeerRequest({
   function denyPeer(peerId: string) {
     room.denyPeer(peerId);
   }
+  function getLobbyPeerMeta(peerId: string) {
+    return room.getLobbyPeerMetadata<TPeerMetadata>(peerId);
+  }
+
   return (
     <Box>
       {room.lobbyPeerIds.map((peerId) => (
@@ -29,10 +34,9 @@ export default function NewPeerRequest({
         >
           <Text as={"span"}>
             <Text as={"span"} fontWeight={500}>
-              {peerId}
-            </Text>{" "}
-            {/* wants to join the meeting */}
-            <Text>wants to join</Text>;
+              {getLobbyPeerMeta(peerId).metadata?.displayName}
+            </Text>
+            <Text as={"span"}>wants to join</Text>
           </Text>
           <HStack>
             <IconButton
