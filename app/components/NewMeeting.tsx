@@ -4,7 +4,7 @@ import { Box, Button, Flex, HStack, Heading, Input } from "@chakra-ui/react";
 import axios from "axios";
 import { useRouter, NextRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { BiVideoPlus } from "react-icons/bi";
+import { BiCalendar, BiVideoPlus } from "react-icons/bi";
 import { FiVideo } from "react-icons/fi";
 
 export default function NewMeeting({ router }: { router: NextRouter }) {
@@ -26,7 +26,7 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
       roomId = data?.roomId;
 
       router.push(`/meet/${roomId}`);
-      dispatch(update({ isCreator: true,token: data?.token}));
+      dispatch(update({ isCreator: true, token: data?.token }));
       setIsSending(false);
     } catch (error) {
       console.log("Error creating room", { error });
@@ -50,7 +50,9 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
           // onClick={() => handleCreateNewMeeting()}
           colorScheme="teal"
           variant={"outline"}
+          isDisabled
         >
+          <BiCalendar size={24} />
           Schedule a meeting
         </Button>
         <Button

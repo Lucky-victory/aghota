@@ -1,19 +1,16 @@
 import {
-  Avatar,
   Box,
   Flex,
   HStack,
   Heading,
   IconButton,
-  ResponsiveValue,
-  Badge,
   Button,
   Input,
   Stack,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useRouter } from "next/router";
-import { FiChevronRight, FiMicOff, FiUser, FiUsers } from "react-icons/fi";
+import { FiChevronRight } from "react-icons/fi";
 import {
   useLocalAudio,
   useLocalPeer,
@@ -22,21 +19,14 @@ import {
   usePeerIds,
   useRoom,
   useActivePeers,
-  useLobby,
-  useRemotePeer,
 } from "@huddle01/react/hooks";
+import MeetingHeader from "@/components/MeetingHeader";
 import { useEffect, useRef, useState } from "react";
-import NewPeerRequest from "@/components/NewPeerRequest";
 import RemotePeer from "@/components/RemotePeer";
 import LocalPeer from "@/components/LocalPeer";
 import { ChatArea } from "@/components/ChatArea";
 import { RootState, useAppDispatch } from "../../state/store";
-import isEmpty from "just-is-empty";
-import {
-  updateLobbyPeerIds,
-  updateRemotePeer,
-  updateRemotePeerIds,
-} from "@/state/slices";
+import { updateRemotePeer, updateRemotePeerIds } from "@/state/slices";
 import { useSelector } from "react-redux";
 
 export type TPeerMetadata = {
@@ -46,7 +36,7 @@ export type TPeerMetadata = {
 interface Props {
   token: string;
 }
-export default function MeetPage({ token }: Props) {
+export default function MeetPage() {
   const dispatch = useAppDispatch();
   const remotePeersInState = useSelector(
     (state: RootState) => state.remote.peerIds
@@ -64,6 +54,7 @@ export default function MeetPage({ token }: Props) {
   const [lobbyPeersIds, setLobbyPeersIds] = useState<string[]>([]);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isJoining, setIsJoining] = useState<boolean>(false);
+  const [isMinimized, setIsMinimized] = useState<boolean>(true);
 
   const roomInstance = useRoom({
     onFailed(data) {
@@ -75,7 +66,7 @@ export default function MeetPage({ token }: Props) {
 
       updateLocalPeerMetadata({ displayName });
     },
-    onWaiting(data) {
+    onWaiting() {
       setLobbyPeersIds(room.lobbyPeerIds);
     },
     onPeerJoin: (peerId) => {
@@ -90,23 +81,14 @@ export default function MeetPage({ token }: Props) {
     },
   });
 
-  const { joinRoom, state, room, muteEveryone, leaveRoom } = roomInstance;
+  const { joinRoom, state, room } = roomInstance;
   console.log({ roomMeta: room.getMetadata() });
   const isIdle = state === "idle";
   const { roomId } = router.query;
 
-  const {
-    enableVideo,
-    isVideoOn,
-    stream: videoStream,
-    disableVideo,
-  } = useLocalVideo();
+  const { stream: videoStream } = useLocalVideo();
   const { enableAudio, disableAudio, isAudioOn } = useLocalAudio();
-  const {
-    startScreenShare,
-    stopScreenShare,
-    shareStream: shareScreenStream,
-  } = useLocalScreenShare();
+  const { shareStream: shareScreenStream } = useLocalScreenShare();
   const {
     updateMetadata: updateLocalPeerMetadata,
     role,
@@ -166,10 +148,12 @@ export default function MeetPage({ token }: Props) {
       setIsJoining(false);
     } catch (error) {}
   }
-
+  function handleChatAreaMinimize(isMinimized: boolean) {
+    setIsMinimized(isMinimized);
+  }
   return (
     <Flex as="main" minH={"var(--chakra-vh)"} bg={"gray.100"} p={2}>
-      {isIdle && (
+      {/* {isIdle && (
         <Stack
           gap={4}
           minW={300}
@@ -200,112 +184,124 @@ export default function MeetPage({ token }: Props) {
             {meetingCreator.isCreator ? "Start Meeting" : "Ask to Join"}
           </Button>
         </Stack>
-      )}
-      {!isIdle && (
-        <Flex direction={"column"} gap={2} flex={1} minH={"full"}>
-          <MeetingHeader room={room} />
-          <Flex h={"full"} bg={"white"} rounded={"30px"} p={2} gap={3}>
-            {/* video area */}
-            <Flex flexDir={"column"} gap={3} flex={1} minH={"full"}>
-              <LocalPeer
-                {...roomInstance}
-                local={{
-                  displayName: displayName,
-                  role: role,
-                  activePeers,
-                  localPeerId: localPeerId as string,
-                }}
-              />
-              {/* participants area */}
-              {peerIds?.length > 0 && (
-                <HStack h={"150px"} rounded={"30px"} gap={3}>
-                  {peerIds.map((peerId) => (
-                    <RemotePeer
-                      activePeers={activePeers}
-                      key={peerId}
-                      peerId={peerId}
-                    />
-                  ))}
+      )} */}
+      {/* {!isIdle && ( */}
+      <Flex direction={"column"} gap={2} flex={1} minH={"full"}>
+        <MeetingHeader room={room} />
+        <Flex
+          h={"full"}
+          bg={"white"}
+          rounded={"30px"}
+          p={2}
+          gap={3}
+          overflow={"hidden"}
+          pos={"relative"}
+        >
+          {/* video area */}
+          <Flex
+            flexDir={"column"}
+            gap={3}
+            flex={1}
+            minH={"full"}
+            transition={"0.65s ease-in-out"}
+            // transitionProperty={"width"}
+            mr={{ lg: !isMinimized ? "var(--chat-area-width,330px)" : "auto" }}
+          >
+            <LocalPeer
+              {...roomInstance}
+              local={{
+                displayName: displayName,
+                role: role,
+                activePeers,
+                localPeerId: localPeerId as string,
+              }}
+            />
+            {/* participants area */}
+            {peerIds?.length > 0 && (
+              <HStack h={"150px"} rounded={"30px"} gap={3}>
+                {peerIds.map((peerId) => (
+                  <RemotePeer
+                    activePeers={activePeers}
+                    key={peerId}
+                    peerId={peerId}
+                  />
+                ))}
 
-                  <IconButton
-                    aria-label="show all participants"
-                    h={"full"}
-                    colorScheme="gray"
-                    rounded={"30px"}
-                  >
-                    <FiChevronRight />
-                  </IconButton>
-                </HStack>
-              )}
-            </Flex>
-
-            {/* chat area */}
-
-            <ChatArea room={room} />
+                <IconButton
+                  aria-label="show all participants"
+                  h={"full"}
+                  colorScheme="gray"
+                  rounded={"30px"}
+                >
+                  <FiChevronRight />
+                </IconButton>
+              </HStack>
+            )}
           </Flex>
+
+          {/* chat area */}
+
+          <ChatArea room={room} onMinimized={handleChatAreaMinimize} />
         </Flex>
-      )}
+      </Flex>
+      {/* )} */}
     </Flex>
   );
 }
-import { GetServerSidePropsContext } from "next";
-import { AccessToken, Role } from "@huddle01/server-sdk/auth";
-import MeetingHeader from "@/components/MeetingHeader";
-import { meetingCreator } from "../../state/slices";
 
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  let token = "";
+// export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
+//   let token = "";
 
-  const isRoomCreator = ctx.query?.rc == "1";
+//   const isRoomCreator = ctx.query?.rc == "1";
 
-  let role;
-  let permissions;
+//   let role;
+//   let permissions;
 
-  if (isRoomCreator) {
-    // Room creator
-    role = Role.HOST;
-    permissions = {
-      admin: true,
-      canConsume: true,
-      canProduce: true,
-      canProduceSources: {
-        cam: true,
-        mic: true,
-        screen: true,
-      },
-      canRecvData: true,
-      canSendData: true,
-      canUpdateMetadata: true,
-    };
-  } else {
-    role = Role.LISTENER;
+//   if (isRoomCreator) {
+//     // Room creator
+//     role = Role.HOST;
+//     permissions = {
+//       admin: true,
+//       canConsume: true,
+//       canProduce: true,
+//       canProduceSources: {
+//         cam: true,
+//         mic: true,
+//         screen: true,
+//       },
+//       canRecvData: true,
+//       canSendData: true,
+//       canUpdateMetadata: true,
+//     };
+//   } else {
+//     role = Role.LISTENER;
 
-    permissions = {
-      canConsume: true,
-      canProduce: true,
-      canProduceSources: {
-        cam: true,
-        mic: true,
-        screen: true,
-      },
-      canRecvData: true,
-      canSendData: true,
-      canUpdateMetadata: true,
-    };
-  }
+//     permissions = {
+//       canConsume: true,
+//       canProduce: true,
+//       canProduceSources: {
+//         cam: true,
+//         mic: true,
+//         screen: true,
+//       },
+//       canRecvData: true,
+//       canSendData: true,
+//       canUpdateMetadata: true,
+//     };
+//   }
 
-  const roomId = ctx.params?.roomId?.toString() || "";
-  const accessToken = new AccessToken({
-    apiKey: process.env.HUDDLE_API_KEY!,
-    roomId: roomId as string,
-    options: { metadata: { displayName: "mike" } },
-    role,
-    permissions,
-  });
+//   const roomId = ctx.params?.roomId?.toString() || "";
+//   const accessToken = new AccessToken({
+//     apiKey: process.env.HUDDLE_API_KEY!,
+//     roomId: roomId as string,
+//     options: { metadata: { displayName: "mike" } },
+//     role,
+//     permissions,
+//   });
 
-  token = await accessToken.toJwt();
+//   token = await accessToken.toJwt();
 
-  return {
-    props: { token },
-  };
-};
+//   return {
+//     props: { token },
+//   };
+// };
