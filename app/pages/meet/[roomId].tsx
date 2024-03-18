@@ -21,7 +21,7 @@ import {
   useActivePeers,
 } from "@huddle01/react/hooks";
 import MeetingHeader from "@/components/MeetingHeader";
-import { useEffect, useRef, useState } from "react";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import RemotePeer from "@/components/RemotePeer";
 import LocalPeer from "@/components/LocalPeer";
 import { ChatArea } from "@/components/ChatArea";
@@ -169,6 +169,9 @@ export default function MeetPage() {
               Enter your name:
             </Heading>
             <Input
+              onKeyUp={async (e: KeyboardEvent) => {
+                if (e.key == "Enter") await handleCreateNewToken();
+              }}
               colorScheme="teal"
               placeholder="John doe"
               value={displayName}

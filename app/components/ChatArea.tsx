@@ -17,6 +17,7 @@ import { Room } from "@huddle01/web-core";
 import { TPeerMetadata } from "@/pages/meet/[roomId]";
 import { BsChatDots } from "react-icons/bs";
 import ChatInput from "./ChatInput";
+import Linkify from "linkify-react";
 export type TMessage = {
   text: string;
   senderId: string;
@@ -177,6 +178,7 @@ export const ChatArea = ({
             px={1}
             // bg={"white"}
             py={2}
+            pos={"relative"}
             maxH={500}
             overflowY={"auto"}
           >
@@ -205,14 +207,22 @@ export const ChatArea = ({
                   <Text
                     py={1}
                     px={3}
-                    bg={"teal"}
+                    bg={"teal.500"}
                     color={"white"}
                     roundedBottomRight={"35px"}
                     roundedLeft={"35px"}
                     shadow={"sm"}
                     fontSize={"15px"}
                   >
-                    {message.text}
+                    <Linkify
+                      options={{
+                        className: "link-in-chat",
+                        defaultProtocol: "https",
+                        target: "_blank",
+                      }}
+                    >
+                      {message.text}
+                    </Linkify>
                   </Text>
                 </Stack>
               ) : (
@@ -222,6 +232,7 @@ export const ChatArea = ({
                   alignSelf={"flex-start"}
                   p={1}
                   maxW={"280px"}
+                  pos={"relative"}
                 >
                   <HStack
                     align={"flex-start"}
@@ -244,12 +255,19 @@ export const ChatArea = ({
                     shadow={"sm"}
                     fontSize={"15px"}
                   >
-                    {message.text}
+                    <Linkify
+                      options={{
+                        className: "link-in-chat",
+                        defaultProtocol: "https",
+                        target: "_blank",
+                      }}
+                    >
+                      {message.text}
+                    </Linkify>
                   </Text>
                 </Stack>
               );
             })}
-            <div ref={scrollToBottomRef} />
           </Stack>
           {/* message input area */}
           <ChatInput sendData={sendData} />

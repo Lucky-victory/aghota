@@ -1,3 +1,7 @@
-:root{
---chat-area-width:330px;
+:root {
+  --chat-area-width: 330px;
+}
+.link-in-chat {
+  color: var(--chakra-colors-blue-700);
+  text-decoration: underline;
 }

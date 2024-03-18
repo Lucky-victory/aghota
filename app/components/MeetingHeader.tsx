@@ -18,6 +18,7 @@ import {
   Text,
   VStack,
   useClipboard,
+  useToast,
 } from "@chakra-ui/react";
 import { FiUserPlus, FiUsers } from "react-icons/fi";
 import NewPeerRequest from "./NewPeerRequest";
@@ -26,12 +27,20 @@ import { useLobby } from "@huddle01/react/hooks";
 import { updateLobbyPeerIds } from "@/state/slices";
 import { useAppDispatch } from "@/state/store";
 import { useFormik } from "formik";
-import { LuCopy } from "react-icons/lu";
+import { LuCheck, LuCopy } from "react-icons/lu";
 import { useEffect } from "react";
+import axios from "axios";
+import StreamingInput from "./StreamingInput";
 
 export default function MeetingHeader({ room }: { room: Room }) {
   const { onCopy, hasCopied, value, setValue } = useClipboard("");
   const dispatch = useAppDispatch();
+  const toast = useToast({
+    duration: 3000,
+    position: "top",
+    title: "Invitation sent successfully",
+    status: "success",
+  });
   const lobbyPeers = useLobby({
     onLobbyPeersUpdated: (lobbyPeers) => {
       dispatch(updateLobbyPeerIds(lobbyPeers));
@@ -41,8 +50,22 @@ export default function MeetingHeader({ room }: { room: Room }) {
     initialValues: {
       email: "",
     },
-    onSubmit: (values) => {},
+    onSubmit: async (values) => {
+      try {
+        const response = await axios.post("/api/email", {
+          email: values.email,
+          link: window.location.href,
+        });
+        toast();
+      } catch (error) {
+        toast({
+          title: "Something went wrong, please try again",
+          status: "error",
+        });
+      }
+    },
   });
+
   const handleCopy = () => {
     onCopy();
   };
@@ -57,14 +80,15 @@ export default function MeetingHeader({ room }: { room: Room }) {
       gap={5}
       bg={"white"}
       rounded={"40px"}
-      py={2}
+      py={3}
       px={4}
     >
       <Box>
         <Heading size={"md"}>Meeting Title</Heading>
       </Box>
       <HStack px={4} gap={5}>
-        <Box zIndex={3999}>
+        <StreamingInput />
+        <Box zIndex={99}>
           <Popover>
             <PopoverTrigger>
               <Button
@@ -98,7 +122,8 @@ export default function MeetingHeader({ room }: { room: Room }) {
                     bg={"teal.50"}
                     onClick={handleCopy}
                   >
-                    <LuCopy /> {hasCopied ? "Copied" : "Copy Link"}
+                    {hasCopied ? <LuCheck /> : <LuCopy />}{" "}
+                    {hasCopied ? "Copied" : "Copy Link"}
                   </Button>
                   <Stack bg={"gray.50"} p={2} w={"full"}>
                     {/* This code works fine, the ts-ignore is because of the types of Stack(which is a div) and a div doesn't have an onSubmit, but in reality the code renders a form*/}
@@ -120,9 +145,14 @@ export default function MeetingHeader({ room }: { room: Room }) {
                           placeholder="Enter email"
                         />
                       </FormControl>
-                      <Button type="submit" colorScheme="teal">
+                      <Button
+                        isLoading={formik.isSubmitting}
+                        loadingText={"Sending..."}
+                        type="submit"
+                        colorScheme="teal"
+                      >
                         {" "}
-                        Send
+                        Send Invite
                       </Button>
                     </Stack>
                   </Stack>
@@ -131,7 +161,7 @@ export default function MeetingHeader({ room }: { room: Room }) {
             </PopoverContent>
           </Popover>
         </Box>
-        <HStack>
+        <HStack gap={4}>
           <HStack>
             <FiUsers />
             <Text fontSize={"13px"} as={"span"}>
