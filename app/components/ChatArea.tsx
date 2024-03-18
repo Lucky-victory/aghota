@@ -115,7 +115,7 @@ export const ChatArea = ({
     <>
       <Button
         colorScheme="teal"
-        size={"lg"}
+        size={{ base: "md", md: "lg" }}
         rounded={"full"}
         shadow={"lg"}
         right={4}
@@ -129,7 +129,7 @@ export const ChatArea = ({
         gap={2}
       >
         <FiMessageCircle />
-        Live Chat
+        <Text hideBelow={"sm"}>Live Chat</Text>
       </Button>
       <Box
         zIndex={993}
@@ -201,14 +201,14 @@ export const ChatArea = ({
                       {message?.senderName} (You)
                     </Text>
                     <Text as={"span"} flexShrink={0}>
-                      {formatMessageTime(message.timestamp)} ago
+                      {formatMessageTime(message.timestamp)}
                     </Text>
                   </HStack>
                   <Text
                     py={1}
                     px={3}
-                    bg={"teal.500"}
-                    color={"white"}
+                    bg={"teal.100"}
+                    // color={"white"}
                     roundedBottomRight={"35px"}
                     roundedLeft={"35px"}
                     shadow={"sm"}
@@ -243,7 +243,7 @@ export const ChatArea = ({
                       {message?.senderName}
                     </Text>
                     <Text as={"span"} flexShrink={0}>
-                      {formatMessageTime(message.timestamp)} ago
+                      {formatMessageTime(message.timestamp)}
                     </Text>
                   </HStack>
                   <Text

@@ -25,16 +25,18 @@ export default function NewPeerRequest({
   function getLobbyPeerMeta(peerId: string) {
     return room.getLobbyPeerMetadata<TPeerMetadata>(peerId);
   }
-  useEffect(() => {
+  function getLastPeer() {
     const lobbyPeerId = room.lobbyPeerIds[room.lobbyPeerIds.length - 1];
     if (!isEmpty(lobbyPeerId)) {
-      setLastLobbyPeer({
+      return {
         name: getLobbyPeerMeta(lobbyPeerId).metadata?.displayName,
         id: lobbyPeerId,
-      });
+      };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room.lobbyPeerIds]);
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   return (
     <Box>
       <HStack
@@ -47,7 +49,7 @@ export default function NewPeerRequest({
       >
         <Text as={"span"}>
           <Text as={"span"} fontWeight={500}>
-            {lastLobbyPeer?.name}
+            {getLastPeer()?.name}
           </Text>
           <Text as={"span"}> wants to join</Text>
         </Text>
@@ -57,12 +59,12 @@ export default function NewPeerRequest({
             size={"sm"}
             aria-label="reject"
             colorScheme="red"
-            onClick={() => denyPeer(lastLobbyPeer?.id as string)}
+            onClick={() => denyPeer(getLastPeer()?.id as string)}
           >
             <FiSlash size={20} />
           </IconButton>
           <IconButton
-            onClick={() => acceptPeer(lastLobbyPeer?.id as string)}
+            onClick={() => acceptPeer(getLastPeer()?.id as string)}
             size={"sm"}
             colorScheme="green"
             rounded={"full"}

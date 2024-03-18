@@ -3,7 +3,7 @@ import { useAppDispatch } from "@/state/store";
 import { Box, Button, Flex, HStack, Heading, Input } from "@chakra-ui/react";
 import axios from "axios";
 import { useRouter, NextRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { KeyboardEvent, useEffect, useState } from "react";
 import { BiCalendar, BiVideoPlus } from "react-icons/bi";
 import { FiVideo } from "react-icons/fi";
 
@@ -39,6 +39,14 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
       <Heading>Create A Meeting</Heading>
 
       <Input
+        colorScheme="teal"
+        _focus={{
+          boxShadow: "0 0 0 1px teal",
+          borderColor: "teal",
+        }}
+        onKeyUp={async (e: KeyboardEvent) => {
+          if (e.key == "Enter") await handleCreateNewMeeting();
+        }}
         placeholder="What's the meeting for?..."
         value={meetingTitle}
         onChange={(e) => setMeetingTitle(e.target.value)}
@@ -50,6 +58,7 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
           // onClick={() => handleCreateNewMeeting()}
           colorScheme="teal"
           variant={"outline"}
+          gap={2}
           isDisabled
         >
           <BiCalendar size={24} />
@@ -59,7 +68,7 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
           // flex={1}
           gap={2}
           isLoading={isSending}
-          onClick={() => handleCreateNewMeeting()}
+          onClick={async () => await handleCreateNewMeeting()}
           colorScheme="teal"
         >
           <BiVideoPlus size={24} />

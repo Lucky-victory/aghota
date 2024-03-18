@@ -57,6 +57,7 @@ export default function MeetingHeader({ room }: { room: Room }) {
           link: window.location.href,
         });
         toast();
+        formik.resetForm();
       } catch (error) {
         toast({
           title: "Something went wrong, please try again",
@@ -84,7 +85,7 @@ export default function MeetingHeader({ room }: { room: Room }) {
       px={4}
     >
       <Box>
-        <Heading size={"md"}>Meeting Title</Heading>
+        <Heading size={{ base: "sm", md: "md" }}>Meeting Title</Heading>
       </Box>
       <HStack px={4} gap={5}>
         <StreamingInput />
@@ -103,7 +104,7 @@ export default function MeetingHeader({ room }: { room: Room }) {
                 aria-label="active peers"
               >
                 <FiUserPlus />
-                <Text>Invite people</Text>
+                <Text hideBelow={"md"}>Invite people</Text>
               </Button>
             </PopoverTrigger>
 
@@ -164,7 +165,7 @@ export default function MeetingHeader({ room }: { room: Room }) {
         <HStack gap={4}>
           <HStack>
             <FiUsers />
-            <Text fontSize={"13px"} as={"span"}>
+            <Text hideBelow={"md"} fontSize={"13px"} as={"span"}>
               Pending Invites
             </Text>
           </HStack>

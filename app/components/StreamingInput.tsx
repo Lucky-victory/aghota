@@ -64,7 +64,7 @@ export default function StreamingInput() {
             aria-label="active peers"
           >
             <FiYoutube />
-            <Text>Stream to youtube</Text>
+            <Text hideBelow={"md"}>Stream to youtube</Text>
           </Button>
         </PopoverTrigger>
 

@@ -65,7 +65,6 @@ export default function LocalPeer(props: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const miniVideoRef = useRef<HTMLVideoElement>(null);
   const screenShareRef = useRef<HTMLVideoElement>(null);
-  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isMutedAll, setIsMutedAll] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const { activePeers, localPeerId } = props.local;
@@ -89,8 +88,6 @@ export default function LocalPeer(props: Props) {
     stopScreenShare,
     shareStream: shareScreenStream,
   } = useLocalScreenShare();
-
-  const roomId = router.query.roomId as string;
 
   useEffect(() => {
     if (!shareScreenStream && videoStream && videoRef.current) {
@@ -198,6 +195,7 @@ export default function LocalPeer(props: Props) {
         pos={"relative"}
         rounded={"20px"}
         w={"full"}
+        h={"full"}
         transition={"ease-in-out"}
         transitionProperty={"boxShadow"}
         boxShadow={isSpeaking ? "0 0 0 2px blue" : "none"}
@@ -246,7 +244,7 @@ export default function LocalPeer(props: Props) {
             </HStack>
             {shareScreenStream && videoStream && (
               <Box
-                w={"250px"}
+                w={"200px"}
                 zIndex={3}
                 h={"150px"}
                 rounded={"lg"}
