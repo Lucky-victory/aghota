@@ -84,10 +84,12 @@ export default function MeetPage() {
   const { joinRoom, state, room } = roomInstance;
   console.log({ roomMeta: room.getMetadata() });
   const isIdle = state === "idle";
+  const isConnecting = state === "connecting";
+  const isConnected = state === "connected";
   const { roomId } = router.query;
 
   const { stream: videoStream } = useLocalVideo();
-  const { enableAudio, disableAudio, isAudioOn } = useLocalAudio();
+
   const { shareStream: shareScreenStream } = useLocalScreenShare();
   const {
     updateMetadata: updateLocalPeerMetadata,
@@ -151,6 +153,28 @@ export default function MeetPage() {
   function handleChatAreaMinimize(isMinimized: boolean) {
     setIsMinimized(isMinimized);
   }
+
+  async function startRecording() {
+    try {
+      setIsRecording(true);
+      const recording = await axios("/api/start-recording?roomId=" + roomId);
+      console.log({ recording });
+    } catch (error) {
+      console.log("Error while starting recording");
+    }
+  }
+  async function stopRecording() {
+    try {
+      setIsRecording(false);
+      const recording = await axios("/api/stop-recording?roomId=" + roomId);
+      console.log({ recording });
+    } catch (error) {
+      console.log("Error while stopping recording");
+    }
+  }
+  function isNotBot(remotePeerId: string) {
+    return !remotePeerId.includes("bot");
+  }
   return (
     <Flex as="main" minH={"var(--chakra-vh)"} bg={"gray.100"} p={2}>
       {isIdle && (
@@ -188,7 +212,7 @@ export default function MeetPage() {
           </Button>
         </Stack>
       )}
-      {!isIdle && state === "connected" && (
+      {!isIdle && isConnected && (
         <Flex direction={"column"} gap={2} flex={1} minH={"full"}>
           <MeetingHeader room={room} />
           <Flex
@@ -215,6 +239,9 @@ export default function MeetPage() {
               <LocalPeer
                 {...roomInstance}
                 local={{
+                  isRecording: isRecording,
+                  onStartRecord: startRecording,
+                  onStopRecord: stopRecording,
                   displayName: displayName,
                   role: role,
                   activePeers,
@@ -224,13 +251,16 @@ export default function MeetPage() {
               {/* participants area */}
               {peerIds?.length > 0 && (
                 <HStack h={"150px"} rounded={"30px"} gap={3}>
-                  {peerIds.map((peerId) => (
-                    <RemotePeer
-                      activePeers={activePeers}
-                      key={peerId}
-                      peerId={peerId}
-                    />
-                  ))}
+                  {peerIds.map(
+                    (peerId) =>
+                      isNotBot(peerId) && (
+                        <RemotePeer
+                          activePeers={activePeers}
+                          key={peerId}
+                          peerId={peerId}
+                        />
+                      )
+                  )}
 
                   <IconButton
                     aria-label="show all participants"

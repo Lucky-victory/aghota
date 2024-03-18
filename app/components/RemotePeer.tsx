@@ -37,10 +37,10 @@ const RemotePeer = ({ peerId, activePeers }: Props) => {
 
   const { videoStream: screenShareVideo, audioStream: screenAudio } =
     useRemoteScreenShare({ peerId });
-  const vidRef = useRef<HTMLVideoElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const screenVideoRef = useRef<HTMLVideoElement>(null);
-  const screenAudioRef = useRef<HTMLAudioElement>(null);
+  // const vidRef = useRef<HTMLVideoElement>(null);
+  // const audioRef = useRef<HTMLAudioElement>(null);
+  // const screenVideoRef = useRef<HTMLVideoElement>(null);
+  // const screenAudioRef = useRef<HTMLAudioElement>(null);
   const { activePeerIds = [], dominantSpeakerId = "" } = activePeers;
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const participantsCardStyle = {
@@ -121,23 +121,23 @@ const RemotePeer = ({ peerId, activePeers }: Props) => {
   //   }
   // }, [screenShareVideo]);
 
-  useEffect(() => {
-    if (screenAudio && screenAudioRef.current) {
-      screenAudioRef.current.srcObject = screenAudio;
+  // useEffect(() => {
+  //   if (screenAudio && screenAudioRef.current) {
+  //     screenAudioRef.current.srcObject = screenAudio;
 
-      screenAudioRef.current.onloadedmetadata = async () => {
-        try {
-          screenAudioRef.current?.play();
-        } catch (error) {
-          console.error(error);
-        }
-      };
+  //     screenAudioRef.current.onloadedmetadata = async () => {
+  //       try {
+  //         screenAudioRef.current?.play();
+  //       } catch (error) {
+  //         console.error(error);
+  //       }
+  //     };
 
-      screenAudioRef.current.onerror = () => {
-        console.error("videoCard() | Error is happening...");
-      };
-    }
-  }, [screenAudio]);
+  //     screenAudioRef.current.onerror = () => {
+  //       console.error("videoCard() | Error is happening...");
+  //     };
+  //   }
+  // }, [screenAudio]);
 
   return (
     <Box

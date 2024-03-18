@@ -33,6 +33,9 @@ import { RootState } from "@/state/store";
 
 export interface Props {
   local: Record<string, any> & {
+    isRecording: boolean;
+    onStartRecord: () => Promise<void>;
+    onStopRecord: () => Promise<void>;
     activePeers: {
       activePeerIds: string[];
       dominantSpeakerId: string;
@@ -138,7 +141,9 @@ export default function LocalPeer(props: Props) {
         break;
       case "record":
         try {
-          isRecording ? await stopScreenShare() : await startScreenShare();
+          props.local.isRecording
+            ? await stopRecording()
+            : await startRecording();
         } catch (error) {}
         break;
       case "muteAll":
@@ -179,7 +184,12 @@ export default function LocalPeer(props: Props) {
     h: "auto",
     isDisabled: isIdle,
   };
-
+  async function startRecording() {
+    await props.local.onStartRecord?.();
+  }
+  async function stopRecording() {
+    await props.local.onStopRecord?.();
+  }
   return (
     <>
       <Flex
@@ -216,16 +226,17 @@ export default function LocalPeer(props: Props) {
                   {props.local?.displayName} (You)
                 </Text>
               </Box>
-              {isHost && (
+              {isHost && props.local.isRecording && (
                 <Flex
                   rounded={"full"}
                   align={"center"}
                   px={3}
                   py={1}
                   gap={2}
-                  bg={"blackAlpha.400"}
+                  fontWeight={500}
+                  bg={"whiteAlpha.400"}
                   backdropFilter={"auto"}
-                  backdropBlur={"5px"}
+                  backdropBlur={"10px"}
                   color={"white"}
                 >
                   <FiStopCircle color="red" />
@@ -360,9 +371,15 @@ export default function LocalPeer(props: Props) {
             <IconButton
               onClick={() => handleControls("record")}
               {...controlsBtnStyle}
-              aria-label={`${isRecording ? "stop" : "start"} recording`}
+              aria-label={`${
+                props.local.isRecording ? "stop" : "start"
+              } recording`}
             >
-              {isRecording ? <BsStopCircle color="red" /> : <BsRecordCircle />}
+              {props.local.isRecording ? (
+                <BsStopCircle color="red" />
+              ) : (
+                <BsRecordCircle />
+              )}
             </IconButton>
           )}
 
