@@ -6,6 +6,10 @@ import {
 import { ReactNode } from "react";
 const { Button } = chakraTheme.components;
 const theme = extendTheme({
+  fonts: {
+    heading: "var(--font-raleway)",
+    body: "var(--font-raleway)",
+  },
   components: {
     Button: {
       ...Button,
