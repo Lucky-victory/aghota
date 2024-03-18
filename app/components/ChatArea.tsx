@@ -16,6 +16,7 @@ import { FiMessageCircle, FiSend } from "react-icons/fi";
 import { Room } from "@huddle01/web-core";
 import { TPeerMetadata } from "@/pages/meet/[roomId]";
 import { BsChatDots } from "react-icons/bs";
+import ChatInput from "./ChatInput";
 export type TMessage = {
   text: string;
   senderId: string;
@@ -32,7 +33,7 @@ export const ChatArea = ({
   onMinimized: (isMinimized: boolean) => void;
 }) => {
   const [messages, setMessages] = useState<TMessage[]>([]);
-  const [text, setText] = useState<string>("");
+
   const [isMinimized, setIsMinimized] = useState<boolean>(true);
   const {
     peerId,
@@ -63,24 +64,9 @@ export const ChatArea = ({
       return room.remotePeerExists(peerId)?.getMetadata<TPeerMetadata>();
     }
   }
-  function handleInputChange(evt: ChangeEvent<HTMLInputElement>) {
-    setText(evt.target.value);
-  }
-  const sendMessage = () => {
-    sendData({
-      to: "*",
-      payload: text,
-      label: "chat",
-    });
-    setText("");
-  };
+
   function isLocalPeer(senderId: string): boolean {
     return peerId === senderId;
-  }
-  function handleInputKeyUp(evt: KeyboardEvent<HTMLInputElement>): void {
-    if (evt.key === "Enter" && !evt.shiftKey) {
-      sendMessage();
-    }
   }
   function formatMessageTime(time: number): string {
     let label = "";
@@ -266,31 +252,7 @@ export const ChatArea = ({
             <div ref={scrollToBottomRef} />
           </Stack>
           {/* message input area */}
-          <Box px={1} py={3}>
-            <HStack p={2} bg={"white"} rounded={"full"}>
-              <Input
-                name="message"
-                value={text}
-                autoComplete="off"
-                onKeyUp={handleInputKeyUp}
-                onChange={handleInputChange}
-                _focus={{ boxShadow: "0 0 0 1px teal", borderColor: "teal" }}
-                placeholder="Type a message..."
-                fontWeight={500}
-                colorScheme="teal"
-                rounded={"full"}
-              />
-              <IconButton
-                isDisabled={text === ""}
-                onClick={sendMessage}
-                rounded={"full"}
-                colorScheme="teal"
-                aria-label="send message"
-              >
-                <FiSend />
-              </IconButton>
-            </HStack>
-          </Box>
+          <ChatInput sendData={sendData} />
         </Stack>
       </Box>
     </>

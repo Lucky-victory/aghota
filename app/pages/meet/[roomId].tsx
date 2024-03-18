@@ -153,7 +153,7 @@ export default function MeetPage() {
   }
   return (
     <Flex as="main" minH={"var(--chakra-vh)"} bg={"gray.100"} p={2}>
-      {/* {isIdle && (
+      {isIdle && (
         <Stack
           gap={4}
           minW={300}
@@ -184,67 +184,69 @@ export default function MeetPage() {
             {meetingCreator.isCreator ? "Start Meeting" : "Ask to Join"}
           </Button>
         </Stack>
-      )} */}
-      {/* {!isIdle && ( */}
-      <Flex direction={"column"} gap={2} flex={1} minH={"full"}>
-        <MeetingHeader room={room} />
-        <Flex
-          h={"full"}
-          bg={"white"}
-          rounded={"30px"}
-          p={2}
-          gap={3}
-          overflow={"hidden"}
-          pos={"relative"}
-        >
-          {/* video area */}
+      )}
+      {!isIdle && state === "connected" && (
+        <Flex direction={"column"} gap={2} flex={1} minH={"full"}>
+          <MeetingHeader room={room} />
           <Flex
-            flexDir={"column"}
+            h={"full"}
+            bg={"white"}
+            rounded={"30px"}
+            p={2}
             gap={3}
-            flex={1}
-            minH={"full"}
-            transition={"0.65s ease-in-out"}
-            // transitionProperty={"width"}
-            mr={{ lg: !isMinimized ? "var(--chat-area-width,330px)" : "auto" }}
+            overflow={"hidden"}
+            pos={"relative"}
           >
-            <LocalPeer
-              {...roomInstance}
-              local={{
-                displayName: displayName,
-                role: role,
-                activePeers,
-                localPeerId: localPeerId as string,
+            {/* video area */}
+            <Flex
+              flexDir={"column"}
+              gap={3}
+              flex={1}
+              minH={"full"}
+              transition={"0.65s ease-in-out"}
+              // transitionProperty={"width"}
+              mr={{
+                lg: !isMinimized ? "var(--chat-area-width,330px)" : "auto",
               }}
-            />
-            {/* participants area */}
-            {peerIds?.length > 0 && (
-              <HStack h={"150px"} rounded={"30px"} gap={3}>
-                {peerIds.map((peerId) => (
-                  <RemotePeer
-                    activePeers={activePeers}
-                    key={peerId}
-                    peerId={peerId}
-                  />
-                ))}
+            >
+              <LocalPeer
+                {...roomInstance}
+                local={{
+                  displayName: displayName,
+                  role: role,
+                  activePeers,
+                  localPeerId: localPeerId as string,
+                }}
+              />
+              {/* participants area */}
+              {peerIds?.length > 0 && (
+                <HStack h={"150px"} rounded={"30px"} gap={3}>
+                  {peerIds.map((peerId) => (
+                    <RemotePeer
+                      activePeers={activePeers}
+                      key={peerId}
+                      peerId={peerId}
+                    />
+                  ))}
 
-                <IconButton
-                  aria-label="show all participants"
-                  h={"full"}
-                  colorScheme="gray"
-                  rounded={"30px"}
-                >
-                  <FiChevronRight />
-                </IconButton>
-              </HStack>
-            )}
+                  <IconButton
+                    aria-label="show all participants"
+                    h={"full"}
+                    colorScheme="gray"
+                    rounded={"30px"}
+                  >
+                    <FiChevronRight />
+                  </IconButton>
+                </HStack>
+              )}
+            </Flex>
+
+            {/* chat area */}
+
+            <ChatArea room={room} onMinimized={handleChatAreaMinimize} />
           </Flex>
-
-          {/* chat area */}
-
-          <ChatArea room={room} onMinimized={handleChatAreaMinimize} />
         </Flex>
-      </Flex>
-      {/* )} */}
+      )}
     </Flex>
   );
 }

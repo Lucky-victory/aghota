@@ -182,32 +182,6 @@ export default function LocalPeer(props: Props) {
 
   return (
     <>
-      {isIdle && (
-        <Flex
-          pos={"fixed"}
-          top={0}
-          left={0}
-          gap={5}
-          backdropBlur={"15px"}
-          backdropFilter={"auto"}
-          bg={"blackAlpha.600"}
-          w={"full"}
-          h={"full"}
-          zIndex={100}
-          justify={"center"}
-          align={"center"}
-        >
-          <Spinner
-            thickness="4px"
-            speed="0.75s"
-            emptyColor="gray.200"
-            color="gray.600"
-            size="xl"
-          />
-          <Text fontSize={"20px"}>Waiting...</Text>
-        </Flex>
-      )}
-
       <Flex
         flex={1}
         overflow={"hidden"}

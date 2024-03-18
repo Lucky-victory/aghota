@@ -9,7 +9,6 @@ import {
   Heading,
   Input,
   Popover,
-  PopoverAnchor,
   PopoverArrow,
   PopoverBody,
   PopoverCloseButton,
@@ -18,22 +17,20 @@ import {
   Stack,
   Text,
   VStack,
+  useClipboard,
 } from "@chakra-ui/react";
-import { FiClipboard, FiUserPlus, FiUsers } from "react-icons/fi";
+import { FiUserPlus, FiUsers } from "react-icons/fi";
 import NewPeerRequest from "./NewPeerRequest";
 import { Room } from "@huddle01/web-core";
 import { useLobby } from "@huddle01/react/hooks";
 import { updateLobbyPeerIds } from "@/state/slices";
 import { useAppDispatch } from "@/state/store";
 import { useFormik } from "formik";
-import {
-  LuClipboard,
-  LuClipboardCopy,
-  LuCopy,
-  LuUsers,
-  LuUsers2,
-} from "react-icons/lu";
+import { LuCopy } from "react-icons/lu";
+import { useEffect } from "react";
+
 export default function MeetingHeader({ room }: { room: Room }) {
+  const { onCopy, hasCopied, value, setValue } = useClipboard("");
   const dispatch = useAppDispatch();
   const lobbyPeers = useLobby({
     onLobbyPeersUpdated: (lobbyPeers) => {
@@ -44,9 +41,15 @@ export default function MeetingHeader({ room }: { room: Room }) {
     initialValues: {
       email: "",
     },
-    onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
-    },
+    onSubmit: (values) => {},
+  });
+  const handleCopy = () => {
+    onCopy();
+  };
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setValue(window.location.href);
+    }
   });
   return (
     <HStack
@@ -93,8 +96,9 @@ export default function MeetingHeader({ room }: { room: Room }) {
                     colorScheme="teal"
                     variant={"ghost"}
                     bg={"teal.50"}
+                    onClick={handleCopy}
                   >
-                    <LuCopy /> Copy Link
+                    <LuCopy /> {hasCopied ? "Copied" : "Copy Link"}
                   </Button>
                   <Stack bg={"gray.50"} p={2} w={"full"}>
                     {/* This code works fine, the ts-ignore is because of the types of Stack(which is a div) and a div doesn't have an onSubmit, but in reality the code renders a form*/}
