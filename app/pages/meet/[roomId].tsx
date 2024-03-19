@@ -126,12 +126,6 @@ export default function MeetPage() {
       console.log("Error while joining room", { error });
     }
   }
-  // useEffect(() => {
-  //   const fetcher = async () => {
-  //     await handleCreateNewToken();
-  //   };
-  //   fetcher();
-  // }, []);
 
   async function handleCreateNewToken() {
     console.log("handleCreateToken");
@@ -139,6 +133,7 @@ export default function MeetPage() {
       setIsJoining(true);
       if (meetingCreator.isCreator && meetingCreator.token) {
         await handleJoinRoom(meetingCreator.token);
+        setDisplayName(displayName);
         return;
       } else {
         const response = await axios.post(
@@ -170,8 +165,8 @@ export default function MeetPage() {
   }
   async function stopRecording() {
     try {
-      setIsRecording(false);
       const recording = await axios("/api/stop-recording?roomId=" + roomId);
+      setIsRecording(false);
       console.log({ recording });
     } catch (error) {
       console.log("Error while stopping recording");

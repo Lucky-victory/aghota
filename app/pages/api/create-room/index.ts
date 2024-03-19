@@ -1,7 +1,6 @@
 import { AccessToken, Role } from "@huddle01/server-sdk/auth";
 import axios from "axios";
 import type { NextApiRequest, NextApiResponse } from "next";
-import Api from "@huddle01/server-sdk/api";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
