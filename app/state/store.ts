@@ -1,11 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
-import { localPeerSlice, meetingCreator, remotePeersSlice } from "./slices";
+import { meetingCreator } from "./slices";
 
 const store = configureStore({
   reducer: {
-    local: localPeerSlice.reducer,
-    remote: remotePeersSlice.reducer,
     meetingCreator: meetingCreator.reducer,
   },
 });

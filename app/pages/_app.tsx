@@ -25,7 +25,7 @@ const config = getDefaultConfig({
   appName: "Aghota",
   projectId: process.env.NEXT_PUBLIC_WALLET_PROJECT_ID!,
   chains: [mainnet, polygon, optimism, arbitrum, base, zora],
-  // ssr: true, // If your dApp uses server side rendering (SSR)
+  ssr: true, // If your dApp uses server side rendering (SSR)
 });
 const queryClient = new QueryClient();
 const huddleClient = new HuddleClient({

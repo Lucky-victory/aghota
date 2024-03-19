@@ -28,8 +28,6 @@ import {
 import { LuScreenShare, LuScreenShareOff } from "react-icons/lu";
 import { Room } from "@huddle01/web-core";
 import { RoomStates } from "@huddle01/web-core/types";
-import { useSelector } from "react-redux";
-import { RootState } from "@/state/store";
 
 export interface Props {
   local: Record<string, any> & {
@@ -57,8 +55,6 @@ export interface Props {
   }) => Promise<void>;
 }
 export default function LocalPeer(props: Props) {
-  const localState = useSelector((state: RootState) => state.local);
-
   const isHost = props.local.role === "host";
   const router = useRouter();
   // const [displayName, setDisplayName] = useState<string>("Lucky");

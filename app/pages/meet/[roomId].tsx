@@ -29,7 +29,6 @@ import RemotePeer from "@/components/RemotePeer";
 import LocalPeer from "@/components/LocalPeer";
 import { ChatArea } from "@/components/ChatArea";
 import { RootState, useAppDispatch } from "../../state/store";
-import { updateRemotePeer, updateRemotePeerIds } from "@/state/slices";
 import { useSelector } from "react-redux";
 
 export type TPeerMetadata = {
@@ -41,9 +40,7 @@ interface Props {
 }
 export default function MeetPage() {
   const dispatch = useAppDispatch();
-  const remotePeersInState = useSelector(
-    (state: RootState) => state.remote.peerIds
-  );
+
   const meetingCreator = useSelector(
     (state: RootState) => state.meetingCreator
   );

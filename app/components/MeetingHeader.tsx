@@ -24,7 +24,6 @@ import { FiUserPlus, FiUsers } from "react-icons/fi";
 import NewPeerRequest from "./NewPeerRequest";
 import { Room } from "@huddle01/web-core";
 import { useLobby } from "@huddle01/react/hooks";
-import { updateLobbyPeerIds } from "@/state/slices";
 import { useAppDispatch } from "@/state/store";
 import { useFormik } from "formik";
 import { LuCheck, LuCopy } from "react-icons/lu";
@@ -42,9 +41,7 @@ export default function MeetingHeader({ room }: { room: Room }) {
     status: "success",
   });
   const lobbyPeers = useLobby({
-    onLobbyPeersUpdated: (lobbyPeers) => {
-      dispatch(updateLobbyPeerIds(lobbyPeers));
-    },
+    onLobbyPeersUpdated: (lobbyPeers) => {},
   });
   const formik = useFormik({
     initialValues: {
