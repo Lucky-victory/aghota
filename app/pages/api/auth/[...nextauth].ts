@@ -69,7 +69,7 @@ export default async function auth(req: any, res: any) {
     callbacks: {
       async signIn({ user, account, profile, email, credentials }) {
         console.log({ user, account, profile, email, credentials });
-
+        // check if the user already exists, if not create it
         return true;
       },
       async session({ session, token }: { session: any; token: any }) {

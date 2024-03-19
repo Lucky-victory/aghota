@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:push": "drizzle-kit push:mysql",
+    "db:gen": "drizzle-kit generate:mysql"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
@@ -20,6 +22,7 @@
     "@tanstack/react-query": "^5.28.4",
     "axios": "^1.6.7",
     "date-fns": "^3.3.1",
+    "dotenv": "^16.4.5",
     "drizzle-orm": "^0.30.2",
     "ethers": "^5",
     "formik": "^2.4.5",
