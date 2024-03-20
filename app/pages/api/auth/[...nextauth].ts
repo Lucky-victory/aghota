@@ -114,25 +114,20 @@ export default async function auth(req: any, res: any) {
       },
       async session({ session, token }: { session: any; token: any }) {
         // console.log({ token, session }, "from session");
+        const existing = await db.query.users.findFirst({
+          where: eq(users.address, token.sub),
+        });
+        if (existing) {
+          session.user = { ...token?.user, ...existing };
+        }
 
         session.address = token.sub;
-        session.chainId = token?.chainId;
-        session.user.address = token.sub;
-        session.user.id = token?.userId;
-        session.user.fullName = token?.fullName;
-        session.user.role = token?.role || "user";
-        session.user.avatarUrl = token?.avatarUrl;
-        // console.log({ session, token }, "after update");
 
         return session;
       },
       async jwt({ user, token }) {
-        token.chainId = user?.chainId;
-        token.userId = user?.userId;
-        token.avatarUrl = user?.avatarUrl;
-        token.fullName = user?.fullName;
-        token.role = user?.role;
-        // console.log({ user, token }, "from jwt");
+        // console.log({ token, user });
+        token.user = user;
         return token;
       },
     },

@@ -1,5 +1,5 @@
 import { objectToSearchParams } from "@/utils";
-import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query";
+import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 import {
   APIResponse,
   MEETINGS,
@@ -18,18 +18,16 @@ export const AghotaApi = createApi({
   tagTypes: ["MeetingRecords", "Meetings", "Users", "Rooms", "Tokens"],
 
   endpoints: (builder) => ({
-    getUser: builder.query<Partial<APIResponse<USERS>>, Record<string, string>>(
-      {
-        query: (params) => {
-          return {
-            url: `users?${objectToSearchParams(params)}`,
-          };
-        },
-        providesTags: (result, error, { id }) => {
-          return [{ type: "Users" as const, id }];
-        },
-      }
-    ),
+    getUser: builder.query<Partial<APIResponse<USERS>>, Record<string, any>>({
+      query: (params) => {
+        return {
+          url: `users?${objectToSearchParams(params)}`,
+        };
+      },
+      providesTags: (result, error, { id }) => {
+        return [{ type: "Users" as const, id }];
+      },
+    }),
     getMeetings: builder.query<
       Partial<APIResponse<MEETINGS[]>>,
       Record<string, string>
@@ -127,4 +125,13 @@ export const AghotaApi = createApi({
     }),
   }),
 });
-export const { useGet } = AghotaApi;
+export const {
+  useAddMeetingMutation,
+  useAddMeetingRecordMutation,
+  useAddUserMutation,
+  useCreateRoomMutation,
+  useCreateTokenMutation,
+  useGetMeetingRecordsQuery,
+  useGetMeetingsQuery,
+  useGetUserQuery,
+} = AghotaApi;

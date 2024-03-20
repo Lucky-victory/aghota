@@ -228,7 +228,7 @@ export default function LocalPeer(props: Props) {
                   py={1}
                   gap={2}
                   fontWeight={500}
-                  bg={"whiteAlpha.400"}
+                  bg={"blackAlpha.400"}
                   backdropFilter={"auto"}
                   backdropBlur={"10px"}
                   color={"white"}

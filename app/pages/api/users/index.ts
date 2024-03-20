@@ -28,10 +28,9 @@ export const GET: HTTP_METHOD_CB = async (
     let where = userId
       ? { where: eq(users.id, parseInt(userId as string)) }
       : {
-          where: and(
-            eq(users.chainId, parseInt(chainId as string)),
-            eq(users.address, address as string)
-          ),
+          where:
+            // eq(users.chainId, parseInt(chainId as string)),
+            eq(users.address, address as string),
         };
     const user = await db.query.users.findFirst({
       ...where,

@@ -8,7 +8,6 @@ import { getSession } from "next-auth/react";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const session = await getToken({ req });
-  console.log({ session: session });
 
   try {
     const { userMeta, ...body } = req.body;
@@ -29,7 +28,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
     const roomId = data?.data?.roomId;
     const token = await createTokenForAdmin(roomId, {
-      ...session,
       ...userMeta,
     });
     res.status(200).json({ roomId, token });

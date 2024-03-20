@@ -1,6 +1,4 @@
 import Head from "next/head";
-import Image from "next/image";
-import { Inter, Varela_Round } from "next/font/google";
 
 import { Box, Flex, HStack, Heading } from "@chakra-ui/react";
 import NewMeeting from "@/components/NewMeeting";

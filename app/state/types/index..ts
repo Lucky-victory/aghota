@@ -7,9 +7,9 @@ export type APIResponse<T> = {
 export type USERS = {
   id: number;
   address: string;
-  chainId: number;
+  chainId?: number;
   fullName?: string | null;
-  role: "admin" | "user";
+  role?: "admin" | "user";
   avatarUrl?: string;
 };
 export type NEW_USER = Pick<
@@ -20,7 +20,7 @@ export type MEETINGS = {
   id: number;
   roomId: string;
   title: string;
-  userId: number;
+  userAddress: string;
   participants?: number;
 };
 export type MEETING_RECORDS = {
@@ -28,20 +28,21 @@ export type MEETING_RECORDS = {
   meetingId?: number;
   roomId: string;
   recordDuration: number;
-  userId?: number;
+  userAddress?: string;
   recordUri: string;
 };
 export type NEW_MEETING_RECORDS = Pick<
   MEETING_RECORDS,
-  "meetingId" | "recordDuration" | "recordUri" | "roomId" | "userId"
+  "meetingId" | "recordDuration" | "recordUri" | "roomId" | "userAddress"
 >;
-export type NEW_MEETING = Pick<MEETINGS, "roomId" | "userId" | "title">;
+export type NEW_MEETING = Pick<MEETINGS, "roomId" | "userAddress" | "title">;
 export type UserSession = DefaultSession & {
   address: string;
-  chainId: number;
+  chainId?: number;
   user: {
-    id: string;
+    id: number;
     avatarUrl?: string;
     fullName?: string;
+    address?: string;
   };
 };

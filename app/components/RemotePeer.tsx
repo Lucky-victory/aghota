@@ -34,7 +34,6 @@ const RemotePeer = ({ peerId, activePeers }: Props) => {
   const remotePeer = useRemotePeer<TPeerMetadata>({ peerId });
   const { stream: videoStream, state } = useRemoteVideo({ peerId });
   const { stream: audioStream, state: audioState } = useRemoteAudio({ peerId });
-  const remoteState = useSelector((state: RootState) => state.remote);
 
   const { videoStream: screenShareVideo, audioStream: screenAudio } =
     useRemoteScreenShare({ peerId });
