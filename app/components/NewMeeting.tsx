@@ -11,6 +11,7 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
   const [meetingTitle, setMeetingTitle] = useState("");
   const [isSending, setIsSending] = useState(false);
   const dispatch = useAppDispatch();
+  // const [addMeeting]=use
   async function handleCreateNewMeeting() {
     let roomId = "";
     try {
@@ -25,9 +26,9 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
       const { data } = response;
       roomId = data?.roomId;
 
-      router.push(`/meet/${roomId}`);
       dispatch(update({ isCreator: true, token: data?.token }));
       setIsSending(false);
+      router.push(`/meet/${roomId}`);
     } catch (error) {
       console.log("Error creating room", { error });
     }

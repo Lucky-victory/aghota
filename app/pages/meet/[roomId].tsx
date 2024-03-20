@@ -276,7 +276,7 @@ export default function MeetPage() {
 
               {/* participants area */}
               {peerIds?.length > 0 && (
-                <Flex h={150} gap={3} overflowX={"auto"}>
+                <Flex h={170} gap={3} overflowX={"auto"} p={2}>
                   <HStack gap={3} flex={1}>
                     {peerIds.map(
                       (peerId) =>

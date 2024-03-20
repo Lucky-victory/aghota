@@ -59,7 +59,6 @@ export default function App({
               getSiweMessageOptions={getSiweMessageOptions}
             >
               <RainbowKitProvider>
-                {" "}
                 <Provider store={store}>
                   <HuddleProvider client={huddleClient}>
                     <AppChakraProvider>

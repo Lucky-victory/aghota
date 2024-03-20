@@ -18,31 +18,20 @@ export const AghotaApi = createApi({
   tagTypes: ["MeetingRecords", "Meetings", "Users", "Rooms", "Tokens"],
 
   endpoints: (builder) => ({
-    getUsers: builder.query<
-      Partial<APIResponse<USERS[]>>,
-      Record<string, string>
-    >({
-      query: (params) => {
-        return {
-          url: `users?${objectToSearchParams(params)}`,
-        };
-      },
-      providesTags: (result) =>
-        // is result available?
-        result?.data
-          ? // successful query
-            [
-              ...result?.data.map(({ id }) => ({
-                type: "Users" as const,
-                id,
-              })),
-              { type: "Users", id: "LIST" },
-            ]
-          : // an error occurred, but we still want to refetch this query when `{ type: 'Users', id: 'LIST' }` is invalidated
-            [{ type: "Users", id: "LIST" }],
-    }),
+    getUser: builder.query<Partial<APIResponse<USERS>>, Record<string, string>>(
+      {
+        query: (params) => {
+          return {
+            url: `users?${objectToSearchParams(params)}`,
+          };
+        },
+        providesTags: (result, error, { id }) => {
+          return [{ type: "Users" as const, id }];
+        },
+      }
+    ),
     getMeetings: builder.query<
-      Partial<APIResponse<USERS[]>>,
+      Partial<APIResponse<MEETINGS[]>>,
       Record<string, string>
     >({
       query: (params) => {
@@ -65,7 +54,7 @@ export const AghotaApi = createApi({
             [{ type: "Meetings", id: "LIST" }],
     }),
     getMeetingRecords: builder.query<
-      Partial<APIResponse<USERS[]>>,
+      Partial<APIResponse<MEETING_RECORDS[]>>,
       Record<string, string>
     >({
       query: (params) => {
@@ -138,3 +127,4 @@ export const AghotaApi = createApi({
     }),
   }),
 });
+export const { useGet } = AghotaApi;

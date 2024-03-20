@@ -1,14 +1,22 @@
+import { UserSession } from "@/state/types/index.";
 import { AccessToken, Role } from "@huddle01/server-sdk/auth";
 import axios from "axios";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { type DefaultSession, getServerSession } from "next-auth";
+import { getToken } from "next-auth/jwt";
+import { getSession } from "next-auth/react";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const session = await getToken({ req });
+  console.log({ session: session });
+
   try {
     const { userMeta, ...body } = req.body;
+
     const { data } = await axios.post(
       "https://api.huddle01.com/api/v1/create-room",
       {
-        hostWallets: [],
+        hostWallets: [session?.sub],
         roomLocked: true,
         ...body,
       },
@@ -20,7 +28,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     );
     const roomId = data?.data?.roomId;
-    const token = await createTokenForAdmin(roomId, userMeta);
+    const token = await createTokenForAdmin(roomId, {
+      ...session,
+      ...userMeta,
+    });
     res.status(200).json({ roomId, token });
   } catch (error) {
     res.status(500).json(error);

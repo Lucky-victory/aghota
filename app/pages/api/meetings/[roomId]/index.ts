@@ -6,6 +6,7 @@ import {
   mainHandler,
   successHandlerCallback,
 } from "@/utils";
+import { eq, or } from "drizzle-orm";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -14,7 +15,6 @@ export default async function handler(
 ) {
   return mainHandler(req, res, {
     GET,
-    POST,
   });
 }
 
@@ -23,28 +23,16 @@ export const GET: HTTP_METHOD_CB = async (
   res: NextApiResponse
 ) => {
   try {
-    const meetings = await db.query.meetings.findMany();
-    return successHandlerCallback(req, res, {
-      message: "Meetings received successfully",
-      data: meetings,
+    const { roomId } = req.query;
+    const meeting = await db.query.meetings.findFirst({
+      where: or(
+        eq(meetings.roomId, roomId as string),
+        eq(meetings.id, +(roomId as string))
+      ),
     });
-  } catch (error) {
-    return errorHandlerCallback(req, res, {
-      message: "Something went wrong...",
-      data: null,
-    });
-  }
-};
-export const POST: HTTP_METHOD_CB = async (
-  req: NextApiRequest,
-  res: NextApiResponse
-) => {
-  try {
-    const data = req.body;
-    const createdMeeting = await db.insert(meetings).values(data);
     return successHandlerCallback(req, res, {
-      message: "Meeting created successfully",
-      data: createdMeeting,
+      message: "Meeting received successfully",
+      data: meeting,
     });
   } catch (error) {
     return errorHandlerCallback(req, res, {

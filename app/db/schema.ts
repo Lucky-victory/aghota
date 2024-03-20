@@ -24,7 +24,8 @@ export const users = mysqlTable(
 );
 export const meetingRecords = mysqlTable("MeetingRecords", {
   id: int("id").autoincrement().primaryKey(),
-  meetingId: varchar("meetingId", { length: 100 }).notNull(),
+  meetingId: varchar("meetingId", { length: 100 }),
+  roomId: varchar("roomId", { length: 255 }),
   userId: int("userId").notNull(),
   recordDuration: int("recordDuration"),
   recordUri: varchar("recordUri", { length: 255 }),
@@ -33,6 +34,7 @@ export const meetingRecords = mysqlTable("MeetingRecords", {
 });
 export const meetings = mysqlTable("Meetings", {
   id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }),
   roomId: varchar("roomId", { length: 100 }).notNull(),
   userId: int("userId").notNull(),
   participants: int("participants"),
