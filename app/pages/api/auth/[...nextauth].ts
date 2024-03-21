@@ -67,11 +67,11 @@ export default async function auth(req: any, res: any) {
               avatarUrl: "https://avatar.iran.liara.run/public",
             };
           }
-          return null;
+          throw "/";
         } catch (e) {
           console.log("auth error", { e });
 
-          return null;
+          throw "/";
         }
       },
     }),
@@ -91,7 +91,7 @@ export default async function auth(req: any, res: any) {
     session: {
       strategy: "jwt",
     },
-    useSecureCookies: false,
+
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
       async signIn({ user, account, profile, email, credentials }) {

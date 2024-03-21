@@ -51,7 +51,7 @@ export default function Home() {
     setFormToShow(form);
     onOpen();
   }
-  let url = typeof window !== "undefined" ? window.location.href : "";
+  let url = "https://aghota.vercel.app";
   return (
     <PageWrapper maxW={1200}>
       <Head>
@@ -62,7 +62,7 @@ export default function Home() {
             Meet, Ideas Converge, and Opportunities Thrive. Join Us in Shaping
             the Next Era of Digital Interaction!"
         />
-        <meta property="og:image" content={`${url}images/og.png`}></meta>
+        <meta property="og:image" content={`${url}/images/og.png`}></meta>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
