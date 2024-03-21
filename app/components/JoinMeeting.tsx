@@ -28,6 +28,7 @@ export default function JoinMeeting() {
       <FormControl>
         <FormLabel>Enter meeting ID:</FormLabel>
         <Input
+          autoComplete="off"
           py={3}
           h={"auto"}
           colorScheme="teal"

@@ -37,6 +37,7 @@ export default async function auth(req: any, res: any) {
             domain: nextAuthUrl.host,
             nonce: await getCsrfToken({ req }),
           });
+          console.log({ result, siwe, credentials });
 
           if (result.success) {
             // you can query the database here to get more user information such as name,etc...
