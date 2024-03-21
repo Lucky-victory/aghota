@@ -38,16 +38,16 @@ export default function NewMeeting() {
         "/api/create-room",
         {
           title: meetingTitle,
-          userMeta: session.user,
+          // userMeta: session.user,
         }
       );
       const { data } = response;
       roomId = data?.roomId;
-      await addMeeting({
-        roomId,
-        title: meetingTitle,
-        userAddress: session.address,
-      });
+      // await addMeeting({
+      //   roomId,
+      //   title: meetingTitle,
+      //   userAddress: session.address,
+      // });
 
       dispatch(update({ isCreator: true, token: data?.token }));
       setIsSending(false);
