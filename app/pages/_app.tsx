@@ -5,7 +5,11 @@ import AppChakraProvider from "../providers/chakra";
 import { Provider } from "react-redux";
 import store from "@/state/store";
 import "@rainbow-me/rainbowkit/styles.css";
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import {
+  getDefaultConfig,
+  lightTheme,
+  RainbowKitProvider,
+} from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum, base, zora } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
@@ -58,7 +62,13 @@ export default function App({
             <RainbowKitSiweNextAuthProvider
               getSiweMessageOptions={getSiweMessageOptions}
             >
-              <RainbowKitProvider>
+              <RainbowKitProvider
+                theme={lightTheme({
+                  accentColor: "#008080",
+                  accentColorForeground: "white",
+                  borderRadius: "large",
+                })}
+              >
                 <Provider store={store}>
                   <HuddleProvider client={huddleClient}>
                     <AppChakraProvider>

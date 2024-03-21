@@ -2,7 +2,16 @@ import { useAddMeetingMutation, useCreateRoomMutation } from "@/state/services";
 import { update } from "@/state/slices";
 import { useAppDispatch } from "@/state/store";
 import { UserSession } from "@/state/types/index.";
-import { Box, Button, Flex, HStack, Heading, Input } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormLabel,
+  HStack,
+  Heading,
+  Input,
+} from "@chakra-ui/react";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { useRouter, NextRouter } from "next/router";
@@ -10,7 +19,9 @@ import { KeyboardEvent, useEffect, useState } from "react";
 import { BiCalendar, BiVideoPlus } from "react-icons/bi";
 import { FiVideo } from "react-icons/fi";
 
-export default function NewMeeting({ router }: { router: NextRouter }) {
+export default function NewMeeting() {
+  const router = useRouter();
+
   const [meetingTitle, setMeetingTitle] = useState("");
   const [isSending, setIsSending] = useState(false);
   const dispatch = useAppDispatch();
@@ -49,43 +60,36 @@ export default function NewMeeting({ router }: { router: NextRouter }) {
   }
   return (
     <Flex flexDir={"column"} gap={4} maxW={400}>
-      <Heading>Create A Meeting</Heading>
-
-      <Input
-        colorScheme="teal"
-        _focus={{
-          boxShadow: "0 0 0 1px teal",
-          borderColor: "teal",
-        }}
-        onKeyUp={async (e: KeyboardEvent) => {
-          if (e.key == "Enter") await handleCreateNewMeeting();
-        }}
-        placeholder="What's the meeting for?..."
-        value={meetingTitle}
-        onChange={(e) => setMeetingTitle(e.target.value)}
-      />
+      {/* <Heading>Create A Meeting</Heading> */}
+      <FormControl>
+        <FormLabel>Meeting Title:</FormLabel>
+        <Input
+          py={3}
+          isDisabled={isSending}
+          colorScheme="teal"
+          _focus={{
+            boxShadow: "0 0 0 1px teal",
+            borderColor: "teal",
+          }}
+          onKeyUp={async (e: KeyboardEvent) => {
+            if (e.key == "Enter") await handleCreateNewMeeting();
+          }}
+          placeholder="What's the meeting about?..."
+          value={meetingTitle}
+          onChange={(e) => setMeetingTitle(e.target.value)}
+        />
+      </FormControl>
       <HStack>
         <Button
-          flex={1}
-          // isLoading={isSending}
-          // onClick={() => handleCreateNewMeeting()}
-          colorScheme="teal"
-          variant={"outline"}
-          gap={2}
-          isDisabled
-        >
-          <BiCalendar size={24} />
-          Schedule a meeting
-        </Button>
-        <Button
+          rounded={"full"}
           // flex={1}
           gap={2}
           isLoading={isSending}
           onClick={async () => await handleCreateNewMeeting()}
           colorScheme="teal"
         >
-          <BiVideoPlus size={24} />
-          Start Instant Meeting
+          {/* <BiVideoPlus size={24} /> */}
+          Continue
         </Button>
       </HStack>
     </Flex>

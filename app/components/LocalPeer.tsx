@@ -28,6 +28,7 @@ import {
 import { LuScreenShare, LuScreenShareOff } from "react-icons/lu";
 import { Room } from "@huddle01/web-core";
 import { RoomStates } from "@huddle01/web-core/types";
+import Dialog from "./Dialog";
 
 export interface Props {
   local: Record<string, any> & {
@@ -39,6 +40,7 @@ export interface Props {
       dominantSpeakerId: string;
       updateSize: (size: number) => void;
     };
+    role: string | null;
     localPeerId: string;
     displayName: string;
   };
@@ -56,6 +58,7 @@ export interface Props {
 }
 export default function LocalPeer(props: Props) {
   const isHost = props.local.role === "host";
+
   const router = useRouter();
   // const [displayName, setDisplayName] = useState<string>("Lucky");
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -183,6 +186,10 @@ export default function LocalPeer(props: Props) {
   async function stopRecording() {
     await props.local.onStopRecord?.();
   }
+  function handleEndMeeting() {
+    props.closeRoom();
+    router.push("/");
+  }
   return (
     <>
       <Flex
@@ -233,7 +240,7 @@ export default function LocalPeer(props: Props) {
                   backdropBlur={"10px"}
                   color={"white"}
                 >
-                  <FiStopCircle color="red" />
+                  <FiStopCircle />
                   <Text as={"span"}>Recording...</Text>
                 </Flex>
               )}
@@ -269,6 +276,7 @@ export default function LocalPeer(props: Props) {
                 <Avatar
                   name={props?.local?.displayName}
                   size={"xl"}
+                  // src={props.local?.metadata?.avatarUrl}
                   icon={<FiUser size={50} />}
                 />
               </Stack>
@@ -377,18 +385,11 @@ export default function LocalPeer(props: Props) {
             </IconButton>
           )}
 
-          <IconButton
-            w={"80px"}
-            aria-label="Leave meeting"
-            colorScheme="red"
-            rounded={"full"}
-            fontSize={"20px"}
-            onClick={() => {
-              handleLeaveRoom();
-            }}
-          >
-            <FiPhone />
-          </IconButton>
+          <Dialog
+            role={props.local.role}
+            onEnd={handleEndMeeting}
+            onLeave={handleLeaveRoom}
+          />
         </HStack>
       </Flex>
     </>

@@ -194,6 +194,7 @@ const RemotePeer = ({ peerId, activePeers }: Props) => {
             icon={<FiUser />}
             fontSize={"40px"}
             size={"lg"}
+            // src={remotePeer.metadata?.avatarUrl}
             bg={!remotePeer.metadata?.displayName ? "gray.400" : undefined}
           />
         </Flex>

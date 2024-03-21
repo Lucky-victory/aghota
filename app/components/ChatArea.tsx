@@ -201,7 +201,7 @@ export const ChatArea = ({
                       {message?.senderName} (You)
                     </Text>
                     <Text as={"span"} flexShrink={0}>
-                      {formatMessageTime(message.timestamp)}
+                      {/* {formatMessageTime(message.timestamp)} */}
                     </Text>
                   </HStack>
                   <Text
@@ -243,7 +243,7 @@ export const ChatArea = ({
                       {message?.senderName}
                     </Text>
                     <Text as={"span"} flexShrink={0}>
-                      {formatMessageTime(message.timestamp)}
+                      {/* {formatMessageTime(message.timestamp)} */}
                     </Text>
                   </HStack>
                   <Text
