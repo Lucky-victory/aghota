@@ -15,7 +15,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { data } = await axios.post(
       "https://api.huddle01.com/api/v1/create-room",
       {
-        hostWallets: [session?.sub],
+        // hostWallets: [session?.sub],
         roomLocked: true,
         ...body,
       },
@@ -28,7 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
     const roomId = data?.data?.roomId;
     const token = await createTokenForAdmin(roomId, {
-      ...userMeta,
+      // ...userMeta,
     });
     res.status(200).json({ roomId, token });
   } catch (error) {
@@ -37,7 +37,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 // when a room is created, create a token for the room creator as admin
-export const createTokenForAdmin = async (roomId: string, metadata?: any) => {
+export const createTokenForAdmin = async (
+  roomId: string,
+  metadata: any = {}
+) => {
   try {
     const accessToken = new AccessToken({
       apiKey: process.env.HUDDLE_API_KEY!,
