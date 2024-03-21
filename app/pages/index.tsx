@@ -55,7 +55,7 @@ export default function Home() {
   return (
     <PageWrapper maxW={1200}>
       <Head>
-        <title>Aghota</title>
+        <title>Aghota | Seamlessly Connect, Anywhere, Anytime </title>
         <meta
           name="description"
           content=" Unlock the Future of Collaboration: Aghọta - Where Web3 Innovations
