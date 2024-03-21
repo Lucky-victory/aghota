@@ -66,6 +66,7 @@ export default function Dialog({
                   <Button
                     colorScheme="red"
                     variant={"ghost"}
+                    //@ts-ignore
                     ref={cancelRef}
                     onClick={() => handleLeave()}
                   >
@@ -81,6 +82,7 @@ export default function Dialog({
                   <Button
                     variant={"ghost"}
                     colorScheme="gray"
+                    //@ts-ignore
                     ref={cancelRef}
                     onClick={onClose}
                   >
