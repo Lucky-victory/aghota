@@ -29,6 +29,7 @@ export default async function auth(req: any, res: any) {
           const siwe = new SiweMessage(
             JSON.parse(credentials?.message || "{}")
           );
+          console.log({ siwe, credentials });
 
           const nextAuthUrl = new URL(process.env.NEXTAUTH_URL!);
 
@@ -37,7 +38,7 @@ export default async function auth(req: any, res: any) {
             domain: nextAuthUrl.host,
             nonce: await getCsrfToken({ req }),
           });
-          console.log({ result, siwe, credentials });
+          console.log({ result });
 
           if (result.success) {
             // you can query the database here to get more user information such as name,etc...
@@ -68,6 +69,8 @@ export default async function auth(req: any, res: any) {
           }
           return null;
         } catch (e) {
+          console.log("auth error", { e });
+
           return null;
         }
       },
@@ -88,6 +91,7 @@ export default async function auth(req: any, res: any) {
     session: {
       strategy: "jwt",
     },
+    useSecureCookies: false,
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
       async signIn({ user, account, profile, email, credentials }) {
@@ -128,7 +132,7 @@ export default async function auth(req: any, res: any) {
       },
       async jwt({ user, token }) {
         // console.log({ token, user });
-        token.user = user;
+        if (user) token.user = user;
         return token;
       },
     },
