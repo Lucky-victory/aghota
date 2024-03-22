@@ -17,6 +17,7 @@
     "@emotion/styled": "^11.11.0",
     "@huddle01/react": "^2.0.5",
     "@huddle01/server-sdk": "^2.0.6",
+    "@privy-io/react-auth": "^1.59.5",
     "@rainbow-me/rainbowkit": "^2.0.2",
     "@rainbow-me/rainbowkit-siwe-next-auth": "^0.4.0",
     "@reduxjs/toolkit": "^2.2.1",

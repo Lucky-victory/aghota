@@ -40,10 +40,10 @@ export default function Home() {
   // const isConnected = status === "authenticated";
   const { onClose, onOpen, isOpen } = useDisclosure();
   function handleStartMeetingClick(form = "new") {
-    // if (!isConnected) {
-    //   openConnectModal?.();
-    //   return;
-    // }
+    if (!isConnected) {
+      openConnectModal?.();
+      return;
+    }
     setFormToShow(form);
     onOpen();
   }
