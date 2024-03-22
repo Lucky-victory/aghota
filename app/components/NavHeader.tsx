@@ -12,7 +12,6 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Link } from "@chakra-ui/next-js";
 import {
   useLogin,
