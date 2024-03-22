@@ -6,6 +6,7 @@ import {
   mainHandler,
   successHandlerCallback,
 } from "@/utils";
+import { eq } from "drizzle-orm";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -41,7 +42,23 @@ export const POST: HTTP_METHOD_CB = async (
 ) => {
   try {
     const data = req.body;
-    const createdMeeting = await db.insert(meetings).values(data);
+    const createdMeeting = await db.transaction(async (tx) => {
+      const [insertResponse] = await tx.insert(meetings).values(data);
+      const meeting = await tx.query.meetings.findFirst({
+        with: {
+          creator: {
+            columns: {
+              id: true,
+              authId: true,
+              address: true,
+              chainId: true,
+            },
+          },
+        },
+        where: eq(meetings.id, insertResponse.insertId),
+      });
+      return meeting;
+    });
     return successHandlerCallback(req, res, {
       message: "Meeting created successfully",
       data: createdMeeting,

@@ -89,7 +89,12 @@ export const AghotaApi = createApi({
     }),
     createRoom: builder.mutation<
       APIResponse<{ roomId: string; token?: string }>,
-      { title: string; params?: Record<string, string> }
+      {
+        title: string;
+        hostWallets?: string[];
+        roomLocked?: boolean;
+        params?: Record<string, string>;
+      }
     >({
       query: ({ params, ...data }) => ({
         url: `create-room?${objectToSearchParams(params!)}`,
@@ -99,8 +104,15 @@ export const AghotaApi = createApi({
       invalidatesTags: [{ type: "Rooms" as const, id: "LIST" }],
     }),
     createToken: builder.mutation<
-      APIResponse<USERS>,
-      NEW_USER & { params: Record<string, string> }
+      APIResponse<{
+        metadata: { displayName: string; address?: string };
+        token: string;
+        roomId?: string;
+      }>,
+      {
+        metadata: Record<string, string>;
+        params: { isCreator: boolean; roomId: string } & Record<string, any>;
+      }
     >({
       query: ({ params, ...data }) => ({
         url: `create-token?${objectToSearchParams(params)}`,
@@ -147,4 +159,5 @@ export const {
   useGetMeetingRecordsQuery,
   useGetMeetingsQuery,
   useGetUserQuery,
+  useGetMeetingQuery,
 } = AghotaApi;

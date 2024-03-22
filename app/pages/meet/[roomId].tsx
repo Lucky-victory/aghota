@@ -31,6 +31,8 @@ import { ChatArea } from "@/components/ChatArea";
 import { RootState, useAppDispatch } from "../../state/store";
 import { useSelector } from "react-redux";
 import PageWrapper from "@/components/PageWrapper";
+import { useCreateTokenMutation, useGetMeetingQuery } from "@/state/services";
+import { usePrivy } from "@privy-io/react-auth";
 
 export type TPeerMetadata = {
   displayName: string;
@@ -40,15 +42,18 @@ interface Props {
   token: string;
 }
 export default function MeetPage() {
+  const router = useRouter();
+  const roomId = router.query.roomId as string;
   const dispatch = useAppDispatch();
-
+  const { data } = useGetMeetingQuery({ roomId: roomId as string });
+  const meeting = data?.data;
+  const [createToken]=useCreateTokenMutation()
   const meetingCreator = useSelector(
     (state: RootState) => state.meetingCreator
   );
-
+const {user}=usePrivy()
   const activePeers = useActivePeers();
 
-  const router = useRouter();
   const [displayName, setDisplayName] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement>(null);
   const screenShareRef = useRef<HTMLVideoElement>(null);
@@ -87,7 +92,6 @@ export default function MeetPage() {
   const isIdle = state === "idle";
   const isConnecting = state === "connecting";
   const isConnected = state === "connected";
-  const { roomId } = router.query;
 
   const { stream: videoStream } = useLocalVideo();
 
@@ -128,22 +132,14 @@ export default function MeetPage() {
     console.log("handleCreateToken");
     try {
       setIsJoining(true);
-      if (meetingCreator.isCreator && meetingCreator.token) {
-        await handleJoinRoom(meetingCreator.token);
-        setDisplayName(displayName);
-        return;
-      } else {
-        const response = await axios.post(
-          `/api/create-token?roomId=${roomId}&isCreator=${meetingCreator.isCreator}`,
-          {
-            metadata: { displayName: displayName },
-          }
-        );
-        const data = response.data;
+   
+        const isCreator =meeting?.creator?.authId==user?.id;
+     const tokenResponse= await createToken({params:{isCreator,roomId},metadata:{address:user?.wallet?.address ||"",displayName}}).unwrap()
+        const data = tokenResponse.data;
 
-        setDisplayName(data?.metadata?.displayName);
+        setDisplayName(data?.metadata?.displayName as string);
         await handleJoinRoom(data?.token);
-      }
+      
       setIsJoining(false);
     } catch (error) {}
   }

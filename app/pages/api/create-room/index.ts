@@ -21,10 +21,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     );
     const roomId = data?.data?.roomId;
-    const token = await createTokenForAdmin(roomId, {
-      // ...userMeta,
-    });
-    res.status(200).json({ roomId, token });
+    // const token = await createTokenForAdmin(roomId, {
+    //   // ...userMeta,
+    // });
+    res.status(200).json({ roomId });
   } catch (error) {
     res.status(500).json(error);
   }

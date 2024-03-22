@@ -10,42 +10,38 @@ import {
   HStack,
   Input,
 } from "@chakra-ui/react";
+import { usePrivy } from "@privy-io/react-auth";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { KeyboardEvent, useState } from "react";
 
 export default function NewMeeting() {
   const router = useRouter();
-
+  const { user } = usePrivy();
   const [meetingTitle, setMeetingTitle] = useState("");
   const [isSending, setIsSending] = useState(false);
   const dispatch = useAppDispatch();
-  const [createRoom, { isLoading }] = useCreateRoomMutation();
+  const [createRoom, { isLoading, isSuccess }] = useCreateRoomMutation();
 
   const [addMeeting] = useAddMeetingMutation();
   async function handleCreateNewMeeting() {
-    let roomId = "";
     try {
       setIsSending(true);
 
-      const response = await axios.post<{ roomId: string; token: string }>(
-        "/api/create-room",
-        {
-          title: meetingTitle,
-          // userMeta: session.user,
-        }
-      );
+      const response = await createRoom({ title: meetingTitle }).unwrap();
       const { data } = response;
-      roomId = data?.roomId;
-      // await addMeeting({
-      //   roomId,
-      //   title: meetingTitle,
-      //   userAddress: session.address,
-      // });
+      const roomId = data?.roomId;
+      await addMeeting({
+        roomId: roomId as string,
+        title: meetingTitle,
+        authId: user?.id,
+      });
 
       dispatch(update({ isCreator: true, token: data?.token }));
-      setIsSending(false);
-      router.push(`/meet/${roomId}`);
+      if (isSuccess) {
+        setIsSending(false);
+        router.push(`/meet/${roomId}`);
+      }
     } catch (error) {
       console.log("Error creating room", { error });
     }

@@ -1,5 +1,3 @@
-import { type DefaultSession } from "next-auth";
-
 export type APIResponse<T> = {
   data: T | null;
   message?: string;
@@ -20,22 +18,28 @@ export type MEETINGS = {
   id: number;
   roomId: string;
   title: string;
-  userAddress: string;
+  authId?: string;
   participants?: number;
+  creator?: {
+    id: number;
+    address: string;
+    chainId?: number;
+    authId: string;
+  };
 };
 export type MEETING_RECORDS = {
   id: number;
   meetingId?: number;
   roomId: string;
   recordDuration: number;
-  userAddress?: string;
+  authId?: string;
   recordUri: string;
 };
 export type NEW_MEETING_RECORDS = Pick<
   MEETING_RECORDS,
-  "meetingId" | "recordDuration" | "recordUri" | "roomId" | "userAddress"
+  "meetingId" | "recordDuration" | "recordUri" | "roomId" | "authId"
 >;
-export type NEW_MEETING = Pick<MEETINGS, "roomId" | "userAddress" | "title">;
+export type NEW_MEETING = Pick<MEETINGS, "roomId" | "authId" | "title">;
 // export type UserSession = DefaultSession & {
 //   address: string;
 //   chainId?: number;
