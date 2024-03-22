@@ -35,7 +35,7 @@ export default function NewMeeting() {
         roomId: roomId as string,
         title: meetingTitle,
         authId: user?.id,
-      });
+      }).unwrap();
 
       dispatch(update({ isCreator: true, token: data?.token }));
       if (isSuccess) {
