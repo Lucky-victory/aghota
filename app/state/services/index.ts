@@ -28,6 +28,19 @@ export const AghotaApi = createApi({
         return [{ type: "Users" as const, id }];
       },
     }),
+    getMeeting: builder.query<
+      Partial<APIResponse<MEETINGS>>,
+      Record<string, any> & { roomId: string }
+    >({
+      query: ({ roomId, ...params }) => {
+        return {
+          url: `meetings/${roomId}?${objectToSearchParams(params)}`,
+        };
+      },
+      providesTags: (result, error, { id }) => {
+        return [{ type: "Users" as const, id }];
+      },
+    }),
     getMeetings: builder.query<
       Partial<APIResponse<MEETINGS[]>>,
       Record<string, string>

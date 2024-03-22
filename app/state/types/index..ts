@@ -36,13 +36,13 @@ export type NEW_MEETING_RECORDS = Pick<
   "meetingId" | "recordDuration" | "recordUri" | "roomId" | "userAddress"
 >;
 export type NEW_MEETING = Pick<MEETINGS, "roomId" | "userAddress" | "title">;
-export type UserSession = DefaultSession & {
-  address: string;
-  chainId?: number;
-  user: {
-    id: number;
-    avatarUrl?: string;
-    fullName?: string;
-    address?: string;
-  };
-};
+// export type UserSession = DefaultSession & {
+//   address: string;
+//   chainId?: number;
+//   user: {
+//     id: number;
+//     avatarUrl?: string;
+//     fullName?: string;
+//     address?: string;
+//   };
+// };

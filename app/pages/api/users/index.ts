@@ -24,13 +24,14 @@ export const GET: HTTP_METHOD_CB = async (
   res: NextApiResponse
 ) => {
   try {
-    const { userId, chainId, address } = req.query;
-    let where = userId
-      ? { where: eq(users.id, parseInt(userId as string)) }
+    const { authId, chainId, address } = req.query;
+    let where = authId
+      ? { where: eq(users.authId, authId as string) }
       : {
-          where:
-            // eq(users.chainId, parseInt(chainId as string)),
-            eq(users.address, address as string),
+          where: and(
+            eq(users.chainId, chainId as string),
+            eq(users.address, address as string)
+          ),
         };
     const user = await db.query.users.findFirst({
       ...where,
@@ -46,21 +47,21 @@ export const GET: HTTP_METHOD_CB = async (
     });
   }
 };
-// export const POST: HTTP_METHOD_CB = async (
-//   req: NextApiRequest,
-//   res: NextApiResponse
-// ) => {
-//   try {
-//     const data = req.body;
-//     const user = await db.insert(users).values(data);
-//     return successHandlerCallback(req, res, {
-//       message: "user created successfully",
-//       data: user,
-//     });
-//   } catch (error) {
-//     return errorHandlerCallback(req, res, {
-//       message: "Something went wrong...",
-//       data: null,
-//     });
-//   }
-// };
+export const POST: HTTP_METHOD_CB = async (
+  req: NextApiRequest,
+  res: NextApiResponse
+) => {
+  try {
+    const data = req.body;
+    const user = await db.insert(users).values(data);
+    return successHandlerCallback(req, res, {
+      message: "user created successfully",
+      data: user,
+    });
+  } catch (error) {
+    return errorHandlerCallback(req, res, {
+      message: "Something went wrong...",
+      data: null,
+    });
+  }
+};

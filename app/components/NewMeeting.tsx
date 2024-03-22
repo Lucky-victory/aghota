@@ -1,23 +1,18 @@
 import { useAddMeetingMutation, useCreateRoomMutation } from "@/state/services";
 import { update } from "@/state/slices";
 import { useAppDispatch } from "@/state/store";
-import { UserSession } from "@/state/types/index.";
+
 import {
-  Box,
   Button,
   Flex,
   FormControl,
   FormLabel,
   HStack,
-  Heading,
   Input,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { useSession } from "next-auth/react";
-import { useRouter, NextRouter } from "next/router";
-import { KeyboardEvent, useEffect, useState } from "react";
-import { BiCalendar, BiVideoPlus } from "react-icons/bi";
-import { FiVideo } from "react-icons/fi";
+import { useRouter } from "next/router";
+import { KeyboardEvent, useState } from "react";
 
 export default function NewMeeting() {
   const router = useRouter();
@@ -26,8 +21,7 @@ export default function NewMeeting() {
   const [isSending, setIsSending] = useState(false);
   const dispatch = useAppDispatch();
   const [createRoom, { isLoading }] = useCreateRoomMutation();
-  const { data } = useSession();
-  const session = data as UserSession;
+
   const [addMeeting] = useAddMeetingMutation();
   async function handleCreateNewMeeting() {
     let roomId = "";

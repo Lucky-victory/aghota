@@ -27,6 +27,20 @@ export async function errorHandlerCallback<T>(
 ): Promise<void> {
   return res.status(status).json(data);
 }
+export function maskWalletAddress(
+  walletAddress: string,
+  visibleChars: number = 4
+): string {
+  if (!walletAddress || walletAddress.length < visibleChars * 2) {
+    return walletAddress;
+  }
+
+  const visiblePart = walletAddress.slice(0, visibleChars);
+  const hiddenPart = "...";
+  const lastVisiblePart = walletAddress.slice(-visibleChars);
+
+  return `${visiblePart}${hiddenPart}${lastVisiblePart}`;
+}
 
 export type HTTP_METHOD = "GET" | "PUT" | "POST" | "DELETE";
 export type HTTP_METHOD_CB = (

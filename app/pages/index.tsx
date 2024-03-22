@@ -3,9 +3,6 @@ import Head from "next/head";
 import {
   Box,
   Button,
-  Flex,
-  Grid,
-  GridItem,
   HStack,
   Heading,
   Image,
@@ -21,27 +18,24 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import NewMeeting from "@/components/NewMeeting";
-import { useRouter } from "next/router";
-import { ConnectButton, useConnectModal } from "@rainbow-me/rainbowkit";
-import { useSession } from "next-auth/react";
 import NavHeader from "@/components/NavHeader";
 import PageWrapper from "@/components/PageWrapper";
 import { BiVideoPlus } from "react-icons/bi";
 import { useState } from "react";
 import JoinMeeting from "@/components/JoinMeeting";
-import { useAccount } from "wagmi";
+
+import { useLogin, usePrivy } from "@privy-io/react-auth";
 
 export default function Home() {
-  const { openConnectModal } = useConnectModal();
-  const { isConnected } = useAccount();
+  const { authenticated, connectOrCreateWallet } = usePrivy();
+  const { login } = useLogin();
   const [formToShow, setFormToShow] = useState<"join" | "new" | string>("join");
-  const { data: session, status } = useSession();
-  console.log({ session });
+
   // const isConnected = status === "authenticated";
   const { onClose, onOpen, isOpen } = useDisclosure();
   function handleStartMeetingClick(form = "new") {
-    if (!isConnected) {
-      openConnectModal?.();
+    if (!authenticated) {
+      login();
       return;
     }
     setFormToShow(form);
