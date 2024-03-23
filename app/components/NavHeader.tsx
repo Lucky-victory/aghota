@@ -25,13 +25,18 @@ import { BiChevronDown } from "react-icons/bi";
 import BoringAvatars from "boring-avatars";
 import { FiLogOut } from "react-icons/fi";
 import { LuChevronDown } from "react-icons/lu";
-import { useAddUserMutation } from "@/state/services";
+import {
+  useAddUserMutation,
+  useGetUserQuery,
+  useLazyGetUserQuery,
+} from "@/state/services";
+import { useEffect } from "react";
 export default function NavHeader() {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { authenticated, ready, login, logout, user } = usePrivy();
-  const [createUser] = useAddUserMutation();
-  const { data: storedUser } = useGetLazyUserQuery();
-  console.log({ user });
+  const [createUser, { data: createdUser }] = useAddUserMutation();
+  const { data: savedUserResponse } = useGetUserQuery({ authId: user?.id });
+  const savedUser = savedUserResponse?.data;
 
   const { ready: walletReady, wallets } = useWallets();
   const linkStyles = {
@@ -39,10 +44,16 @@ export default function NavHeader() {
     color: "gray.600",
     _hover: { color: "teal.400" },
   };
-  function handleLogin() {
+
+  async function handleLogin() {
     login();
-    if (user) {
-      // const savedUser=
+    if (!savedUser && user) {
+      createUser({
+        address: user?.wallet?.address!,
+        chainId: user?.wallet?.chainId,
+        authId: user?.id,
+      });
+      console.log({ createdUser });
     }
   }
 

@@ -5,14 +5,15 @@ export type APIResponse<T> = {
 export type USERS = {
   id: number;
   address: string;
-  chainId?: number;
+  chainId?: string;
   fullName?: string | null;
   role?: "admin" | "user";
   avatarUrl?: string;
+  authId?: string;
 };
 export type NEW_USER = Pick<
   USERS,
-  "address" | "chainId" | "fullName" | "avatarUrl"
+  "address" | "chainId" | "fullName" | "avatarUrl" | "authId"
 >;
 export type MEETINGS = {
   id: number;

@@ -44,13 +44,11 @@ interface Props {
 export default function MeetPage() {
   const router = useRouter();
   const roomId = router.query.roomId as string;
-  const dispatch = useAppDispatch();
+
   const { data } = useGetMeetingQuery({ roomId: roomId as string });
   const meeting = data?.data;
   const [createToken] = useCreateTokenMutation();
-  const meetingCreator = useSelector(
-    (state: RootState) => state.meetingCreator
-  );
+
   const { user } = usePrivy();
   const activePeers = useActivePeers();
 
@@ -61,6 +59,7 @@ export default function MeetPage() {
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
   const [isJoining, setIsJoining] = useState<boolean>(false);
+  const [isRoomCreator, setIsRoomCreator] = useState<boolean>(false);
   const [isMinimized, setIsMinimized] = useState<boolean>(true);
 
   const roomInstance = useRoom({
@@ -134,7 +133,6 @@ export default function MeetPage() {
       setIsJoining(true);
 
       const isCreator = meeting?.authId == user?.id;
-      console.log({ meeting, user, isCreator });
 
       const tokenResponse = await createToken({
         params: { isCreator, roomId },
@@ -150,6 +148,11 @@ export default function MeetPage() {
       console.log({ error });
     }
   }
+  useEffect(() => {
+    const isCreator = meeting?.authId == user?.id;
+    console.log({ meeting, user, isCreator });
+    setIsRoomCreator(isCreator);
+  }, [meeting, user]);
   function handleChatAreaMinimize(isMinimized: boolean) {
     setIsMinimized(isMinimized);
   }
@@ -216,12 +219,14 @@ export default function MeetPage() {
               />
             </Box>
             <Button
+              rounded={"full"}
+              size={"lg"}
               isDisabled={!displayName || displayName.length < 2}
               isLoading={isJoining}
               onClick={async () => await handleCreateNewToken()}
               colorScheme="teal"
             >
-              {meetingCreator.isCreator ? "Start Meeting" : "Ask to Join"}
+              {isRoomCreator ? "Start Meeting" : "Ask to Join"}
             </Button>
           </Stack>
         )}
@@ -236,6 +241,7 @@ export default function MeetPage() {
             py={8}
             px={6}
             rounded={"md"}
+            textAlign={"center"}
           >
             <Heading>Asking to join</Heading>
             <Text>Hold on, an admin will let you in in a moment.</Text>

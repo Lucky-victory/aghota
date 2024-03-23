@@ -15,7 +15,7 @@ export default async function handler(
 ) {
   return mainHandler(req, res, {
     GET,
-    // POST,
+    POST,
   });
 }
 
@@ -38,7 +38,7 @@ export const GET: HTTP_METHOD_CB = async (
     });
     return successHandlerCallback(req, res, {
       message: "user received successfully",
-      data: user,
+      data: user || null,
     });
   } catch (error) {
     return errorHandlerCallback(req, res, {
@@ -53,7 +53,14 @@ export const POST: HTTP_METHOD_CB = async (
 ) => {
   try {
     const data = req.body;
-    const user = await db.insert(users).values(data);
+    const user = await db.transaction(async (tx) => {
+      const [insertRes] = await tx.insert(users).values(data);
+
+      const createdUser = await tx.query.users.findFirst({
+        where: eq(users.id, insertRes.insertId),
+      });
+      return createdUser;
+    });
     return successHandlerCallback(req, res, {
       message: "user created successfully",
       data: user,
@@ -62,6 +69,7 @@ export const POST: HTTP_METHOD_CB = async (
     return errorHandlerCallback(req, res, {
       message: "Something went wrong...",
       data: null,
+      error,
     });
   }
 };
