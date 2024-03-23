@@ -97,7 +97,7 @@ export const AghotaApi = createApi({
       }
     >({
       query: ({ params, ...data }) => ({
-        url: `create-room?${objectToSearchParams(params!)}`,
+        url: `create-room/?${objectToSearchParams(params!)}`,
         method: "POST",
         body: data,
       }),

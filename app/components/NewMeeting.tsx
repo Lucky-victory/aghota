@@ -31,11 +31,13 @@ export default function NewMeeting() {
       const response = await createRoom({ title: meetingTitle }).unwrap();
       const { data } = response;
       const roomId = data?.roomId;
+      console.log({ roomId });
+
       await addMeeting({
         roomId: roomId as string,
         title: meetingTitle,
         authId: user?.id,
-      });
+      }).unwrap();
 
       dispatch(update({ isCreator: true, token: data?.token }));
       if (isSuccess) {
