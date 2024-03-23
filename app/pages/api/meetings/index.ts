@@ -65,6 +65,7 @@ export const POST: HTTP_METHOD_CB = async (
     });
   } catch (error) {
     return errorHandlerCallback(req, res, {
+      error,
       message: "Something went wrong...",
       data: null,
     });

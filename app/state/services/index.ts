@@ -159,5 +159,9 @@ export const {
   useGetMeetingRecordsQuery,
   useGetMeetingsQuery,
   useGetUserQuery,
+  useLazyGetMeetingQuery,
+  useLazyGetMeetingRecordsQuery,
+  useLazyGetMeetingsQuery,
+  useLazyGetUserQuery,
   useGetMeetingQuery,
 } = AghotaApi;

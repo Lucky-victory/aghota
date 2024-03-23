@@ -47,11 +47,11 @@ export default function MeetPage() {
   const dispatch = useAppDispatch();
   const { data } = useGetMeetingQuery({ roomId: roomId as string });
   const meeting = data?.data;
-  const [createToken]=useCreateTokenMutation()
+  const [createToken] = useCreateTokenMutation();
   const meetingCreator = useSelector(
     (state: RootState) => state.meetingCreator
   );
-const {user}=usePrivy()
+  const { user } = usePrivy();
   const activePeers = useActivePeers();
 
   const [displayName, setDisplayName] = useState<string>("");
@@ -132,16 +132,23 @@ const {user}=usePrivy()
     console.log("handleCreateToken");
     try {
       setIsJoining(true);
-   
-        const isCreator =meeting?.creator?.authId==user?.id;
-     const tokenResponse= await createToken({params:{isCreator,roomId},metadata:{address:user?.wallet?.address ||"",displayName}}).unwrap()
-        const data = tokenResponse.data;
 
-        setDisplayName(data?.metadata?.displayName as string);
-        await handleJoinRoom(data?.token);
-      
+      const isCreator = meeting?.authId == user?.id;
+      console.log({ meeting, user, isCreator });
+
+      const tokenResponse = await createToken({
+        params: { isCreator, roomId },
+        metadata: { address: user?.wallet?.address || "", displayName },
+      }).unwrap();
+      const data = tokenResponse.data;
+
+      setDisplayName(data?.metadata?.displayName as string);
+      await handleJoinRoom(data?.token);
+
       setIsJoining(false);
-    } catch (error) {}
+    } catch (error) {
+      console.log({ error });
+    }
   }
   function handleChatAreaMinimize(isMinimized: boolean) {
     setIsMinimized(isMinimized);

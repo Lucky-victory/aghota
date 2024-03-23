@@ -24,9 +24,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // const token = await createTokenForAdmin(roomId, {
     //   // ...userMeta,
     // });
-    res.status(200).json({ roomId });
+    res.status(200).json({ data: { roomId } });
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500).json({ data: null, error });
   }
 };
 

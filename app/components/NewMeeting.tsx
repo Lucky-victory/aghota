@@ -28,8 +28,16 @@ export default function NewMeeting() {
     try {
       setIsSending(true);
 
-      const response = await createRoom({ title: meetingTitle }).unwrap();
-      const { data } = response;
+      //const response = await createRoom({ title: meetingTitle }).unwrap();
+
+      const response = await axios.post<{
+        data: { roomId: string; token: string };
+      }>("/api/create-room", {
+        title: meetingTitle,
+        // userMeta: session.user,
+      });
+      const data = response.data.data;
+
       const roomId = data?.roomId;
       console.log({ roomId });
 
@@ -38,12 +46,10 @@ export default function NewMeeting() {
         title: meetingTitle,
         authId: user?.id,
       }).unwrap();
-
       dispatch(update({ isCreator: true, token: data?.token }));
-      if (isSuccess) {
-        setIsSending(false);
-        router.push(`/meet/${roomId}`);
-      }
+
+      setIsSending(false);
+      router.push(`/meet/${roomId}`);
     } catch (error) {
       console.log("Error creating room", { error });
     }

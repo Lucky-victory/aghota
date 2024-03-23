@@ -12,7 +12,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+
 import { Link } from "@chakra-ui/next-js";
 import {
   useLogin,
@@ -25,9 +25,12 @@ import { BiChevronDown } from "react-icons/bi";
 import BoringAvatars from "boring-avatars";
 import { FiLogOut } from "react-icons/fi";
 import { LuChevronDown } from "react-icons/lu";
+import { useAddUserMutation } from "@/state/services";
 export default function NavHeader() {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { authenticated, ready, login, logout, user } = usePrivy();
+  const [createUser] = useAddUserMutation();
+  const { data: storedUser } = useGetLazyUserQuery();
   console.log({ user });
 
   const { ready: walletReady, wallets } = useWallets();
@@ -36,6 +39,13 @@ export default function NavHeader() {
     color: "gray.600",
     _hover: { color: "teal.400" },
   };
+  function handleLogin() {
+    login();
+    if (user) {
+      // const savedUser=
+    }
+  }
+
   function disconnect() {
     logout();
     onClose();
@@ -66,7 +76,7 @@ export default function NavHeader() {
         <HStack>
           {" "}
           {ready && !authenticated && (
-            <Button shadow={"md"} rounded={"lg"} onClick={() => login()}>
+            <Button shadow={"md"} rounded={"lg"} onClick={() => handleLogin()}>
               Connect wallet
             </Button>
           )}

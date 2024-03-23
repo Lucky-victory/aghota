@@ -82,9 +82,10 @@ export default async function handler(
     //     canUpdateMetadata: true,
     //   },
     // });
-
-    return res.status(200).json({ token, roomId, metadata });
+    return res.status(200).json({ data: { token, roomId, metadata } });
   } catch (error) {
-    return res.status(500).json({ error, message: "Something went wrong..." });
+    return res
+      .status(500)
+      .json({ data: { message: "Something went wrong..." }, error });
   }
 }

@@ -4,7 +4,7 @@ import { HuddleClient, HuddleProvider } from "@huddle01/react";
 import AppChakraProvider from "../providers/chakra";
 import { Provider } from "react-redux";
 import store from "@/state/store";
-import "@rainbow-me/rainbowkit/styles.css";
+
 import { PrivyProvider } from "@privy-io/react-auth";
 
 import { fonts } from "@/fonts";
