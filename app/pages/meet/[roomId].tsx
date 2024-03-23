@@ -33,6 +33,7 @@ import { useSelector } from "react-redux";
 import PageWrapper from "@/components/PageWrapper";
 import { useCreateTokenMutation, useGetMeetingQuery } from "@/state/services";
 import { usePrivy } from "@privy-io/react-auth";
+import isEmpty from "just-is-empty";
 
 export type TPeerMetadata = {
   displayName: string;
@@ -149,7 +150,8 @@ export default function MeetPage() {
     }
   }
   useEffect(() => {
-    const isCreator = meeting?.authId == user?.id;
+    const isCreator =
+      !isEmpty(user) && !isEmpty(meeting) && meeting?.authId == user?.id;
     console.log({ meeting, user, isCreator });
     setIsRoomCreator(isCreator);
   }, [meeting, user]);
@@ -249,7 +251,7 @@ export default function MeetPage() {
         )}
         {!isIdle && isConnected && (
           <Flex direction={"column"} gap={2} flex={1} minH={"full"}>
-            <MeetingHeader room={room} />
+            <MeetingHeader room={room} meetingTitle={meeting?.title} />
             <Flex
               h={"full"}
               bg={"white"}
