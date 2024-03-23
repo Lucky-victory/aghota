@@ -31,7 +31,13 @@ import { useEffect } from "react";
 import axios from "axios";
 import StreamingInput from "./StreamingInput";
 
-export default function MeetingHeader({ room }: { room: Room }) {
+export default function MeetingHeader({
+  room,
+  meetingTitle,
+}: {
+  room: Room;
+  meetingTitle?: string;
+}) {
   const { onCopy, hasCopied, value, setValue } = useClipboard("");
   const dispatch = useAppDispatch();
   const toast = useToast({
@@ -82,11 +88,11 @@ export default function MeetingHeader({ room }: { room: Room }) {
       px={4}
     >
       <Box>
-        <Heading size={{ base: "sm", md: "md" }}>Meeting Title</Heading>
+        <Heading size={{ base: "sm", md: "md" }}>{meetingTitle}</Heading>
       </Box>
       <HStack px={4} gap={5}>
         <StreamingInput />
-        <Box zIndex={99}>
+        <Box>
           <Popover>
             <PopoverTrigger>
               <Button
@@ -118,7 +124,7 @@ export default function MeetingHeader({ room }: { room: Room }) {
                     colorScheme="teal"
                     variant={"ghost"}
                     bg={"teal.50"}
-                    onClick={handleCopy}
+                    onClick={() => handleCopy()}
                   >
                     {hasCopied ? <LuCheck /> : <LuCopy />}{" "}
                     {hasCopied ? "Copied" : "Copy Link"}
